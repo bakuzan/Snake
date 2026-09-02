@@ -18,7 +18,10 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
       stateManager(manager),
       window(win),
       status(GameStatus::LOADING),
-      uiManager(&window, data)
+      uiManager(&window, data),
+      // Props
+      snake(Constants::CELL_SIZE, {15, 10}),
+      food(Constants::CELL_SIZE)
 {
     // Setup Input Manager
     inputManager.bind(Action::PAUSE, sf::Keyboard::Escape);
@@ -28,6 +31,14 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
     inputManager.bind(Action::MOVE_RIGHT, sf::Keyboard::D);
     inputManager.bind(Action::MOVE_UP, sf::Keyboard::W);
     inputManager.bind(Action::MOVE_DOWN, sf::Keyboard::S);
+
+    // Setup entities
+    food.respawn(gridBounds, snake.getSegments());
+
+    updateView();
+
+    // Start
+    status = GameStatus::PLAYING;
 }
 
 GameState::~GameState()
@@ -39,33 +50,42 @@ GameState::~GameState()
 
 void GameState::handleEvent(const sf::Event &event)
 {
-    uiManager.handleEvent(event);
     handleSystemEvents(event);
+    handlePlayerEvents(event);
+
+    uiManager.handleEvent(event);
 }
 
 void GameState::handleWindowResize(sf::Vector2u newSize)
 {
     uiManager.handleResize(newSize.x, newSize.y);
+    updateView();
 }
 
 void GameState::update(sf::Time deltaTime)
 {
-    // TODO restore when implemented
-    // if (gameData.audioManager.getSoundStatus(AudioId::AMBIENT) != sf::Sound::Status::Playing)
-    // {
-    //     gameData.audioManager.playSound(AudioId::AMBIENT, true);
-    // }
+    tickAccumulator += deltaTime;
+    while (tickAccumulator >= tickRate)
+    {
+        tickAccumulator -= tickRate;
 
-    (void)deltaTime;
-    // float dt = deltaTime.asSeconds();
+        snake.update();
 
-    // Read inputs
-    // bool leftHeld = inputManager.isDown(Action::MOVE_LEFT);
-    // bool rightHeld = inputManager.isDown(Action::MOVE_RIGHT);
-    // bool upHeld = inputManager.isDown(Action::MOVE_UP);
-    // bool downHeld = inputManager.isDown(Action::MOVE_DOWN);
+        if (snake.getHeadPosition() == food.getPosition())
+        {
+            snake.grow();
+            food.respawn(gridBounds, snake.getSegments());
+        }
 
-    // UI handling
+        if (checkWallCollision() ||
+            snake.checkSelfCollision())
+        {
+            status = GameStatus::GAME_OVER;
+            onPlayerDeath();
+            return;
+        }
+    }
+
     uiManager.update();
 }
 
@@ -77,13 +97,27 @@ void GameState::render()
     }
 
     // ---- MAIN GAME
-    // TODO
+    window.setView(gameView);
+
+    renderGrid();
+    snake.render(window);
+    food.render(window);
 
     // ---- UI Elements
     uiManager.render();
 }
 
 // Privates
+
+bool GameState::checkWallCollision() const
+{
+    sf::Vector2i head = snake.getHeadPosition();
+    return head.x < 0 ||
+           head.x >= gridBounds.x ||
+           head.y < 0 ||
+           head.y >= gridBounds.y;
+}
+
 void GameState::handleSystemEvents(const sf::Event &event)
 {
     if (event.type == sf::Event::KeyPressed &&
@@ -91,4 +125,69 @@ void GameState::handleSystemEvents(const sf::Event &event)
     {
         stateManager.pushState(std::make_unique<GameMenuState>(gameData, stateManager, window));
     }
+}
+
+void GameState::handlePlayerEvents(const sf::Event &event)
+{
+    if (event.type != sf::Event::KeyPressed)
+    {
+        return;
+    }
+
+    if (inputManager.isPressed(Action::MOVE_UP, event.key.code))
+    {
+        snake.handleInput(Direction::UP);
+    }
+    if (inputManager.isPressed(Action::MOVE_DOWN, event.key.code))
+    {
+        snake.handleInput(Direction::DOWN);
+    }
+    if (inputManager.isPressed(Action::MOVE_LEFT, event.key.code))
+    {
+        snake.handleInput(Direction::LEFT);
+    }
+    if (inputManager.isPressed(Action::MOVE_RIGHT, event.key.code))
+    {
+        snake.handleInput(Direction::RIGHT);
+    }
+}
+
+void GameState::updateView()
+{
+    sf::Vector2f winSize(static_cast<float>(window.getSize().x),
+                         static_cast<float>(window.getSize().y));
+    gameView.setSize(winSize);
+
+    float boardWidth = gridBounds.x * Constants::CELL_SIZE;
+    float boardHeight = gridBounds.y * Constants::CELL_SIZE;
+
+    sf::Vector2f boardCenter(boardWidth / 2.f, boardHeight / 2.f);
+    boardCenter.y -= 40.f; // Need space for UI at top
+
+    gameView.setCenter(boardCenter);
+}
+
+void GameState::renderGrid()
+{
+    sf::RectangleShape cell(sf::Vector2f(Constants::CELL_SIZE, Constants::CELL_SIZE));
+    cell.setFillColor(Constants::cellColour);
+
+    cell.setOutlineThickness(-1.f);
+    cell.setOutlineColor(Constants::cellBorder);
+
+    for (int x = 0; x < gridBounds.x; ++x)
+    {
+        for (int y = 0; y < gridBounds.y; ++y)
+        {
+            cell.setPosition(x * Constants::CELL_SIZE,
+                             y * Constants::CELL_SIZE);
+
+            window.draw(cell);
+        }
+    }
+}
+
+void GameState::onPlayerDeath()
+{
+    stateManager.pushState(std::make_unique<GameOverState>(gameData, stateManager, window));
 }

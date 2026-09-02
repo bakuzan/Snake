@@ -9,12 +9,11 @@
 #include "core/State.h"
 #include "core/StateManager.h"
 #include "core/InputManager.h"
-
 #include "components/UIManager.h"
-
 #include "constants/GameStatus.h"
-
 #include "data/SaveData.h"
+#include "entities/Food.h"
+#include "entities/Snake.h"
 
 class GameState : public State
 {
@@ -22,11 +21,20 @@ private:
     GameData &gameData;
     StateManager &stateManager;
     sf::RenderWindow &window;
+    sf::View gameView;
 
     GameStatus status;
 
     UIManager uiManager;
     InputManager inputManager;
+
+    // Game props
+    sf::Vector2i gridBounds{25, 25};
+    sf::Time tickRate{sf::seconds(0.12f)};
+    sf::Time tickAccumulator{sf::Time::Zero};
+
+    Snake snake;
+    Food food;
 
 public:
     GameState(GameData &data, StateManager &manager, sf::RenderWindow &win,
@@ -38,7 +46,14 @@ public:
     void update(sf::Time deltaTime) override;
     void render() override;
 
+private:
+    bool checkWallCollision() const;
+
     void handleSystemEvents(const sf::Event &event);
+    void handlePlayerEvents(const sf::Event &event);
+    void updateView();
+    void renderGrid();
+    void onPlayerDeath();
 };
 
 #endif // GAMESTATE_H
