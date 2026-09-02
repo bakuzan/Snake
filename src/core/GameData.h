@@ -27,6 +27,9 @@ public:
 public:
     GameData();
     ~GameData();
+
+    // Resetters
+    void reset();
 };
 
 #endif // GAMEDATA_H

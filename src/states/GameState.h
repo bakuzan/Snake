@@ -37,6 +37,8 @@ public:
     void handleWindowResize(sf::Vector2u newSize) override;
     void update(sf::Time deltaTime) override;
     void render() override;
+
+    void handleSystemEvents(const sf::Event &event);
 };
 
 #endif // GAMESTATE_H

@@ -19,3 +19,10 @@ GameData::~GameData()
 {
     // Destructor
 }
+
+// Publics
+
+// Resetting
+void GameData::reset()
+{
+}

@@ -36,7 +36,7 @@ GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWi
                          sf::Vector2f(center.x - viewSize.x / 2.f + (buttonSpacing * 2.0f) + Constants::BUTTON_WIDTH, buttonRowY),
                          [this]()
                          {
-                             /* gameData.reset(); */
+                             gameData.reset();
                              stateManager.replaceStates(std::make_unique<MainMenuState>(gameData, stateManager, window));
                          });
     buttons.emplace_back("Exit", gameData.gameFont, "Exit",

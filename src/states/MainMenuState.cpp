@@ -19,15 +19,9 @@ MainMenuState::MainMenuState(GameData &data, StateManager &manager, sf::RenderWi
     gameTitle.setFillColor(sf::Color::White);
 
     // Add buttons
-
-#ifdef _DEBUG
-    addButton("Sandbox", "Sandbox",
-              [this]() { /* gameData.reset(); */
-                stateManager.changeState(std::make_unique<GameState>(gameData, stateManager, window, SaveData::makeSandbox())); });
-#endif
-
     addButton("New", "New Game",
-              [this]() { /* gameData.reset(); */
+              [this]()
+              {  gameData.reset(); 
                 stateManager.changeState(std::make_unique<GameState>(gameData, stateManager, window, SaveData::makeDefault())); });
     addButton("Settings", "Settings",
               [this]()

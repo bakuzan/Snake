@@ -40,6 +40,7 @@ GameState::~GameState()
 void GameState::handleEvent(const sf::Event &event)
 {
     uiManager.handleEvent(event);
+    handleSystemEvents(event);
 }
 
 void GameState::handleWindowResize(sf::Vector2u newSize)
@@ -80,4 +81,14 @@ void GameState::render()
 
     // ---- UI Elements
     uiManager.render();
+}
+
+// Privates
+void GameState::handleSystemEvents(const sf::Event &event)
+{
+    if (event.type == sf::Event::KeyPressed &&
+        inputManager.isPressed(Action::PAUSE, event.key.code))
+    {
+        stateManager.pushState(std::make_unique<GameMenuState>(gameData, stateManager, window));
+    }
 }

@@ -30,7 +30,9 @@ GameMenuState::GameMenuState(GameData &data, StateManager &manager, sf::RenderWi
               [this]()
               { stateManager.popState(); });
     addButton("Quit", "Quit Game",
-              [this]() { // gameData.reset();
+              [this]()
+              {
+                  gameData.reset();
                   stateManager.replaceStates(std::make_unique<MainMenuState>(gameData, stateManager, window));
               });
     addButton("Exit", "Exit",
