@@ -36,7 +36,8 @@ private:
     Snake snake;
     Food food;
 
-    int currentScore;
+    int currentScore{0};
+    float gameTimeSeconds{0.f};
 
 public:
     GameState(GameData &data, StateManager &manager, sf::RenderWindow &win,

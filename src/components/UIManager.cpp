@@ -7,11 +7,16 @@ UIManager::UIManager(sf::RenderWindow *gameWindow, const GameData &data)
     : window(gameWindow),
       gameData(data)
 {
-    // Setup Score Text
+    // Setup Texts
     scoreText.setFont(gameData.gameFont);
     scoreText.setCharacterSize(28);
     scoreText.setFillColor(sf::Color::White);
     setScore(0);
+
+    timerText.setFont(gameData.gameFont);
+    timerText.setCharacterSize(28);
+    timerText.setFillColor(sf::Color::White);
+    setTime(0);
 
     sf::Vector2u windowSize = window->getSize();
     handleResize(windowSize.x, windowSize.y);
@@ -43,6 +48,7 @@ void UIManager::handleResize(unsigned int windowWidth, unsigned int windowHeight
                                static_cast<float>(windowHeight)));
 
     scoreText.setPosition(20.f, 20.f);
+    timerText.setPosition(static_cast<float>(windowWidth) - 150.f, 20.f);
 }
 
 void UIManager::update()
@@ -56,6 +62,7 @@ void UIManager::render()
 
     // UI ELEMENTS HERE
     window->draw(scoreText);
+    window->draw(timerText);
 
     window->setView(prevView); // Restore previous view
 }
@@ -64,4 +71,12 @@ void UIManager::setScore(int newScore)
 {
     std::string formattedScore = GameUtils::padNumberAsText(newScore, 6, '0');
     scoreText.setString(std::format("{}", formattedScore));
+}
+
+void UIManager::setTime(int totalSeconds)
+{
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+
+    timerText.setString(std::format("{:02}:{:02}", minutes, seconds));
 }

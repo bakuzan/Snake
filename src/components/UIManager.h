@@ -14,6 +14,7 @@ private:
 
     // Elements
     sf::Text scoreText;
+    sf::Text timerText;
 
 public:
     UIManager(sf::RenderWindow *gameWindow, const GameData &data);
@@ -26,6 +27,7 @@ public:
 
     // Access
     void setScore(int newScore);
+    void setTime(int totalSeconds);
 };
 
 #endif // UIMANAGER_H
