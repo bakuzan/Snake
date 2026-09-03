@@ -29,6 +29,9 @@ private:
     int selectedButtonIndex = 0;
 
 private:
+    void addButton(std::string id,
+                   std::string label,
+                   std::function<void()> callback);
     void updateMenuItemPositions();
 
 public:

@@ -3,11 +3,13 @@
 
 #include "constants/Constants.h"
 #include "core/SettingsManager.h"
+#include "data/SaveData.h"
 #include "utils/InputUtils.h"
 #include "utils/GameUtils.h"
 #include "utils/DataUtils.h"
 #include "MainMenuState.h"
 #include "GameOverState.h"
+#include "GameState.h"
 
 GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWindow &win,
                              GameOverStateConfig config)
@@ -30,19 +32,19 @@ GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWi
     gameOverText.setFillColor(stateConfig.titleTextColour);
 
     // Add buttons
-    float buttonRowY = center.y + viewSize.y / 2.f - Constants::BUTTON_HEIGHT - buttonSpacing;
-
-    buttons.emplace_back("Menu", gameData.gameFont, "Main Menu",
-                         sf::Vector2f(center.x - viewSize.x / 2.f + (buttonSpacing * 2.0f) + Constants::BUTTON_WIDTH, buttonRowY),
-                         [this]()
-                         {
-                             gameData.reset();
-                             stateManager.replaceStates(std::make_unique<MainMenuState>(gameData, stateManager, window));
-                         });
-    buttons.emplace_back("Exit", gameData.gameFont, "Exit",
-                         sf::Vector2f(center.x + viewSize.x / 2.f - Constants::BUTTON_WIDTH - buttonSpacing, buttonRowY),
-                         [this]()
-                         { window.close(); });
+    addButton("New", "New Game",
+              [this]()
+              {  gameData.reset(); 
+                stateManager.changeState(std::make_unique<GameState>(gameData, stateManager, window, SaveData::makeDefault())); });
+    addButton("Menu", "Main Menu",
+              [this]()
+              {
+                  gameData.reset();
+                  stateManager.replaceStates(std::make_unique<MainMenuState>(gameData, stateManager, window));
+              });
+    addButton("Exit", "Exit",
+              [this]()
+              { window.close(); });
 
     // To ensure positioning is updated relative to window resizing
     updateMenuItemPositions();
@@ -92,6 +94,13 @@ void GameOverState::render()
 
 // Privates
 
+void GameOverState::addButton(std::string id,
+                              std::string label,
+                              std::function<void()> callback)
+{
+    buttons.emplace_back(id, gameData.gameFont, label, sf::Vector2f(0.f, 0.f), callback);
+}
+
 void GameOverState::updateMenuItemPositions()
 {
     sf::Vector2f viewCenter = gameOverView.getCenter();
@@ -108,8 +117,17 @@ void GameOverState::updateMenuItemPositions()
         viewCenter.x - (gameOverText.getGlobalBounds().width / 2.0f),
         topEdge + buttonSpacing);
 
+    if (buttons.empty())
+    {
+        return;
+    }
+
     float buttonRowY = viewCenter.y + viewSize.y / 2.f - Constants::BUTTON_HEIGHT - buttonSpacing;
-    buttons[0].setPosition(sf::Vector2f(viewCenter.x - viewSize.x / 2.f + buttonSpacing, buttonRowY));
-    buttons[1].setPosition(sf::Vector2f(viewCenter.x - viewSize.x / 2.f + (buttonSpacing * 2.0f) + Constants::BUTTON_WIDTH, buttonRowY));
-    // buttons[2].setPosition(sf::Vector2f(viewCenter.x + viewSize.x / 2.f - Constants::BUTTON_WIDTH - buttonSpacing, buttonRowY));
+    float startX = viewCenter.x - viewSize.x / 2.f;
+
+    for (size_t i = 0; i < buttons.size(); ++i)
+    {
+        float buttonWidthOffset = i * Constants::BUTTON_WIDTH;
+        buttons[i].setPosition(sf::Vector2f(startX + (i * buttonSpacing) + buttonWidthOffset, buttonRowY));
+    }
 }
