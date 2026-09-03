@@ -20,15 +20,26 @@ private:
     sf::View gameOverView;
 
     GameOverStateConfig stateConfig;
+    HighScoreManager highScoreManager;
 
     sf::RectangleShape background;
     sf::Text gameOverText;
+
+    // High Score UI Elements
+    sf::Text initialsPromptText;
+    sf::Text initialsDisplayText;
+    sf::Text leaderboardText;
+
+    std::string playerInitials{""};
+    bool isEnteringInitials{false};
 
     float buttonSpacing;
     std::vector<Button> buttons;
     int selectedButtonIndex = 0;
 
 private:
+    void buildLeaderboardText();
+
     void addButton(std::string id,
                    std::string label,
                    std::function<void()> callback);

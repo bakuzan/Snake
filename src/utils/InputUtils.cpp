@@ -38,11 +38,13 @@ namespace InputUtils
 
         if (event.type == sf::Event::KeyPressed)
         {
-            if (event.key.code == sf::Keyboard::Up)
+            if (event.key.code == sf::Keyboard::Up ||
+                event.key.code == sf::Keyboard::Left)
             {
                 selectedButtonIndex = (selectedButtonIndex - 1 + buttonCount) % buttonCount;
             }
-            else if (event.key.code == sf::Keyboard::Down)
+            else if (event.key.code == sf::Keyboard::Down ||
+                     event.key.code == sf::Keyboard::Right)
             {
                 selectedButtonIndex = (selectedButtonIndex + 1) % buttonCount;
             }

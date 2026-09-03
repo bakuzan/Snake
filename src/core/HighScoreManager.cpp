@@ -13,14 +13,17 @@ HighScoreManager::~HighScoreManager()
     // Destructor
 }
 
-// Publics
-
 void HighScoreManager::loadFromFile(const std::string &fileName)
 {
     std::ifstream file(fileName);
-    highScores.clear();
+    if (!file.is_open())
+    {
+        return;
+    }
 
+    highScores.clear();
     std::string line;
+
     while (std::getline(file, line))
     {
         size_t firstDelimiter = line.find('|');
@@ -40,6 +43,11 @@ void HighScoreManager::loadFromFile(const std::string &fileName)
     std::sort(highScores.begin(), highScores.end(),
               [](const HighScore &a, const HighScore &b)
               { return a.score > b.score; });
+
+    if (highScores.size() > maxHighScores)
+    {
+        highScores.resize(maxHighScores);
+    }
 }
 
 void HighScoreManager::saveToFile(const std::string &fileName)
@@ -54,10 +62,26 @@ void HighScoreManager::saveToFile(const std::string &fileName)
     }
 }
 
+bool HighScoreManager::isHighScore(int score) const
+{
+    if (score <= 0)
+    {
+        return false;
+    }
+
+    if (highScores.size() < maxHighScores)
+    {
+        return true;
+    }
+
+    return score > highScores.back().score;
+}
+
 void HighScoreManager::addScore(const std::string &name, int score)
 {
     std::time_t now = std::time(nullptr);
     highScores.push_back({name, score, now});
+
     std::sort(highScores.begin(), highScores.end(),
               [](const HighScore &a, const HighScore &b)
               { return a.score > b.score; });

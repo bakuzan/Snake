@@ -194,5 +194,6 @@ void GameState::renderGrid()
 
 void GameState::onPlayerDeath()
 {
-    stateManager.pushState(std::make_unique<GameOverState>(gameData, stateManager, window));
+    GameOverStateConfig config = GameOverStateConfig::defaultValues(currentScore);
+    stateManager.pushState(std::make_unique<GameOverState>(gameData, stateManager, window, config));
 }
