@@ -1,7 +1,6 @@
 #include <format>
 #include <iostream>
 
-#include "utils/GameUtils.h"
 #include "utils/InputUtils.h"
 #include "core/SettingsManager.h"
 #include "constants/AudioId.h"

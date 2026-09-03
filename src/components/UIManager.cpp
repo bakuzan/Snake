@@ -1,6 +1,5 @@
 #include <format>
 
-#include "utils/GameUtils.h"
 #include "UIManager.h"
 
 UIManager::UIManager(sf::RenderWindow *gameWindow, const GameData &data)
@@ -69,8 +68,7 @@ void UIManager::render()
 
 void UIManager::setScore(int newScore)
 {
-    std::string formattedScore = GameUtils::padNumberAsText(newScore, 6, '0');
-    scoreText.setString(std::format("{}", formattedScore));
+    scoreText.setString(std::format("{:06}", newScore));
 }
 
 void UIManager::setTime(int totalSeconds)

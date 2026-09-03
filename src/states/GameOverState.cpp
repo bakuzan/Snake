@@ -5,8 +5,6 @@
 #include "constants/Constants.h"
 #include "data/SaveData.h"
 #include "utils/InputUtils.h"
-#include "utils/GameUtils.h"
-#include "utils/DataUtils.h"
 #include "MainMenuState.h"
 #include "GameOverState.h"
 #include "GameState.h"
