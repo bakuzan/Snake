@@ -12,6 +12,9 @@ private:
     sf::View uiView;
     const GameData &gameData;
 
+    // Elements
+    sf::Text scoreText;
+
 public:
     UIManager(sf::RenderWindow *gameWindow, const GameData &data);
     ~UIManager();
@@ -20,6 +23,9 @@ public:
     void handleResize(unsigned int windowWidth, unsigned int windowHeight);
     void update();
     void render();
+
+    // Access
+    void setScore(int newScore);
 };
 
 #endif // UIMANAGER_H

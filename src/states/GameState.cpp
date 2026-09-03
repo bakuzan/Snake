@@ -21,7 +21,8 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
       uiManager(&window, data),
       // Props
       snake(Constants::CELL_SIZE, {15, 10}),
-      food(Constants::CELL_SIZE)
+      food(Constants::CELL_SIZE),
+      currentScore(0)
 {
     // Setup Input Manager
     inputManager.bind(Action::PAUSE, sf::Keyboard::Escape);
@@ -75,6 +76,9 @@ void GameState::update(sf::Time deltaTime)
         {
             snake.grow();
             food.respawn(gridBounds, snake.getSegments());
+
+            currentScore += 100;
+            uiManager.setScore(currentScore);
         }
 
         if (checkWallCollision() ||
@@ -97,6 +101,7 @@ void GameState::render()
     }
 
     // ---- MAIN GAME
+    window.clear();
     window.setView(gameView);
 
     renderGrid();
