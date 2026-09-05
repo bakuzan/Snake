@@ -96,6 +96,14 @@ sf::Vector2i Snake::getHeadPosition() const
     return body.front();
 }
 
+void Snake::setHeadPosition(sf::Vector2i position)
+{
+    if (!body.empty())
+    {
+        body.front() = position;
+    }
+}
+
 const std::deque<sf::Vector2i> &Snake::getSegments() const
 {
     return body;

@@ -33,9 +33,9 @@ void SettingsManager::load()
         if (std::getline(iss, key, '=') &&
             std::getline(iss, value))
         {
-            if (key == "showEnemyHealthBars")
+            if (key == "wrapAroundEnabled")
             {
-                showEnemyHealthBars = (value == "1");
+                wrapAroundEnabled = (value == "1");
             }
         }
     }
@@ -52,7 +52,7 @@ void SettingsManager::save()
     }
 
     // Serialize settings as key=value pairs
-    file << "showEnemyHealthBars=" << (showEnemyHealthBars ? "1" : "0") << "\n";
+    file << "wrapAroundEnabled=" << (wrapAroundEnabled ? "1" : "0") << "\n";
 
     file.close();
 }
@@ -66,5 +66,5 @@ void SettingsManager::reset()
 
 void SettingsManager::restoreDefaults()
 {
-    showEnemyHealthBars = true;
+    wrapAroundEnabled = false;
 }

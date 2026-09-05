@@ -22,6 +22,7 @@ public:
 
     bool checkSelfCollision() const;
     sf::Vector2i getHeadPosition() const;
+    void setHeadPosition(sf::Vector2i position);
     const std::deque<sf::Vector2i> &getSegments() const;
 
     void render(sf::RenderTarget &target) const;

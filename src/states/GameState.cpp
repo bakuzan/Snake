@@ -82,8 +82,51 @@ void GameState::update(sf::Time deltaTime)
             uiManager.setScore(currentScore);
         }
 
-        if (checkWallCollision() ||
-            snake.checkSelfCollision())
+        if (gameData.settingsManager.wrapAroundEnabled)
+        {
+            sf::Vector2i head = snake.getHeadPosition();
+            bool wrapped = false;
+
+            // Check horizontal bounds
+            if (head.x < 0)
+            {
+                head.x = gridBounds.x - 1;
+                wrapped = true;
+            }
+            else if (head.x >= gridBounds.x)
+            {
+                head.x = 0;
+                wrapped = true;
+            }
+
+            // Check vertical bounds
+            if (head.y < 0)
+            {
+                head.y = gridBounds.y - 1;
+                wrapped = true;
+            }
+            else if (head.y >= gridBounds.y)
+            {
+                head.y = 0;
+                wrapped = true;
+            }
+
+            if (wrapped)
+            {
+                snake.setHeadPosition(head);
+            }
+        }
+        else
+        {
+            if (checkWallCollision())
+            {
+                status = GameStatus::GAME_OVER;
+                onPlayerDeath();
+                return;
+            }
+        }
+
+        if (snake.checkSelfCollision())
         {
             status = GameStatus::GAME_OVER;
             onPlayerDeath();

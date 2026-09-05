@@ -13,7 +13,7 @@ private:
 
 public:
     // Data
-    bool showEnemyHealthBars = true;
+    bool wrapAroundEnabled{false};
 
 public:
     SettingsManager();

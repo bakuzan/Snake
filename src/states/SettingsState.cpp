@@ -21,15 +21,13 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
     gameTitle.setFillColor(sf::Color::White);
 
     // Add options
-    // auto &settings = gameData.settingsManager;
-
-    // TODO Add toggle options
-    // toggleOptions.emplace_back(
-    //     "EnemyHealthBars",
-    //     "Enemy Health Bars",
-    //     &settings.showEnemyHealthBars,
-    //     gameData.gameFont,
-    //     sf::Vector2f(0.f, 0.f));
+    auto &settings = gameData.settingsManager;
+    toggleOptions.emplace_back(
+        "WrapAround",
+        "Wall Wrap-Around",
+        &settings.wrapAroundEnabled,
+        gameData.gameFont,
+        sf::Vector2f(0.f, 0.f));
 
     // Add buttons
     buttons.emplace_back("Save", gameData.gameFont, "Save",
