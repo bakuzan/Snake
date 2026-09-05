@@ -62,6 +62,41 @@ void SettingsManager::reset()
     load();
 }
 
+std::string SettingsManager::getModeName() const
+{
+    std::vector<std::string> activeMods;
+
+    if (wrapAroundEnabled)
+    {
+        activeMods.push_back("WRAP");
+    }
+
+    if (activeMods.empty())
+    {
+        return "CLASSIC";
+    }
+
+    std::string result = activeMods[0];
+    for (size_t i = 1; i < activeMods.size(); ++i)
+    {
+        result += " + " + activeMods[i];
+    }
+
+    return result;
+}
+
+std::string SettingsManager::getScoreFilename() const
+{
+    std::string scoreFilename = "highscores";
+
+    if (wrapAroundEnabled)
+    {
+        scoreFilename += "_wrap";
+    }
+
+    return scoreFilename + ".txt";
+}
+
 // Privates
 
 void SettingsManager::restoreDefaults()

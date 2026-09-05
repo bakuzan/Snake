@@ -22,6 +22,9 @@ public:
     void load();
     void save();
     void reset();
+
+    std::string getModeName() const;
+    std::string getScoreFilename() const;
 };
 
 #endif // SETTINGSMANAGER_H

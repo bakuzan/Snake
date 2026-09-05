@@ -1,5 +1,6 @@
 #include <format>
 
+#include "constants/Constants.h"
 #include "UIManager.h"
 
 UIManager::UIManager(sf::RenderWindow *gameWindow, const GameData &data)
@@ -16,6 +17,11 @@ UIManager::UIManager(sf::RenderWindow *gameWindow, const GameData &data)
     timerText.setCharacterSize(28);
     timerText.setFillColor(sf::Color::White);
     setTime(0);
+
+    modeText.setFont(gameData.gameFont);
+    modeText.setCharacterSize(28);
+    modeText.setFillColor(sf::Color::Yellow);
+    modeText.setString(gameData.settingsManager.getModeName());
 
     sf::Vector2u windowSize = window->getSize();
     handleResize(windowSize.x, windowSize.y);
@@ -46,8 +52,18 @@ void UIManager::handleResize(unsigned int windowWidth, unsigned int windowHeight
                                static_cast<float>(windowWidth),
                                static_cast<float>(windowHeight)));
 
-    scoreText.setPosition(20.f, 20.f);
-    timerText.setPosition(static_cast<float>(windowWidth) - 150.f, 20.f);
+    float boardWidth = Constants::GRID_WIDTH * Constants::CELL_SIZE;
+    float startX = (windowWidth - boardWidth) / 2.f;
+    float yPos = 20.f;
+
+    // Set label positions
+    scoreText.setPosition(startX, yPos);
+
+    sf::FloatRect scoreBounds = scoreText.getLocalBounds();
+    modeText.setPosition(startX, (yPos * 2) + scoreBounds.height);
+
+    sf::FloatRect timerBounds = timerText.getLocalBounds();
+    timerText.setPosition(startX + boardWidth - timerBounds.width, yPos);
 }
 
 void UIManager::update()
@@ -62,6 +78,7 @@ void UIManager::render()
     // UI ELEMENTS HERE
     window->draw(scoreText);
     window->draw(timerText);
+    window->draw(modeText);
 
     window->setView(prevView); // Restore previous view
 }

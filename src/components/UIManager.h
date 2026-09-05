@@ -15,6 +15,7 @@ private:
     // Elements
     sf::Text scoreText;
     sf::Text timerText;
+    sf::Text modeText;
 
 public:
     UIManager(sf::RenderWindow *gameWindow, const GameData &data);

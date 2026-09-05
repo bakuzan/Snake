@@ -10,6 +10,7 @@
 #include "core/StateManager.h"
 #include "core/InputManager.h"
 #include "components/UIManager.h"
+#include "constants/Constants.h"
 #include "constants/GameStatus.h"
 #include "data/SaveData.h"
 #include "entities/Food.h"
@@ -29,7 +30,7 @@ private:
     InputManager inputManager;
 
     // Game props
-    sf::Vector2i gridBounds{25, 25};
+    sf::Vector2i gridBounds{Constants::GRID_WIDTH, Constants::GRID_WIDTH};
     sf::Time tickRate{sf::seconds(0.12f)};
     sf::Time tickAccumulator{sf::Time::Zero};
 

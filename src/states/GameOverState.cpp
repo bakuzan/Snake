@@ -20,7 +20,7 @@ GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWi
     window.setView(gameOverView);
 
     // Load existing high scores
-    highScoreManager.loadFromFile("highscores.txt");
+    highScoreManager.loadFromFile(gameData.settingsManager.getScoreFilename());
 
     // Check if score qualifies for high score list
     if (highScoreManager.isHighScore(stateConfig.score))
@@ -51,8 +51,13 @@ GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWi
     initialsDisplayText.setString("[ _ _ _ ]");
 
     // Leaderboard Display Text
+    modeText.setFont(gameData.gameFont);
+    modeText.setCharacterSize(36);
+    modeText.setFillColor(sf::Color::Yellow);
+    modeText.setString(gameData.settingsManager.getModeName());
+
     leaderboardText.setFont(gameData.gameFont);
-    leaderboardText.setCharacterSize(28);
+    leaderboardText.setCharacterSize(36);
     leaderboardText.setFillColor(sf::Color::White);
 
     buildLeaderboardText();
@@ -102,7 +107,7 @@ void GameOverState::handleEvent(const sf::Event &event)
                      playerInitials.length() == 3)
             {
                 highScoreManager.addScore(playerInitials, stateConfig.score);
-                highScoreManager.saveToFile("highscores.txt");
+                highScoreManager.saveToFile(gameData.settingsManager.getScoreFilename());
 
                 isEnteringInitials = false;
 
@@ -183,6 +188,7 @@ void GameOverState::render()
     }
     else
     {
+        window.draw(modeText);
         window.draw(leaderboardText);
 
         for (const auto &button : buttons)
@@ -254,9 +260,14 @@ void GameOverState::updateMenuItemPositions()
                                     viewCenter.y + 40.f);
 
     // High Score Table Layout
+    float boardOffset = 150.f;
+    sf::FloatRect modeBounds = modeText.getLocalBounds();
     sf::FloatRect boardBounds = leaderboardText.getLocalBounds();
+
+    modeText.setPosition(viewCenter.x - (boardBounds.width / 2.f),
+                         viewCenter.y - viewSize.y / 2.f + boardOffset);
     leaderboardText.setPosition(viewCenter.x - (boardBounds.width / 2.f),
-                                viewCenter.y - viewSize.y / 2.f + 150.f);
+                                viewCenter.y - viewSize.y / 2.f + boardOffset + modeBounds.height + 20.f);
 
     if (buttons.empty())
     {

@@ -28,6 +28,7 @@ private:
     // High Score UI Elements
     sf::Text initialsPromptText;
     sf::Text initialsDisplayText;
+    sf::Text modeText;
     sf::Text leaderboardText;
 
     std::string playerInitials{""};

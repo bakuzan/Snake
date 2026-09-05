@@ -14,6 +14,7 @@ namespace Constants
     constexpr float BUTTON_WIDTH = 250.0f;
     constexpr float BUTTON_HEIGHT = 50.0f;
     constexpr float CELL_SIZE = 32.0f;
+    constexpr int GRID_WIDTH = 25;
 
     // Colours
     const sf::Color cellColour(83, 86, 90);
