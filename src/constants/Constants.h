@@ -24,6 +24,9 @@ namespace Constants
     const sf::Color headColour(108, 187, 60);
     const sf::Color tailColour(121, 196, 74);
 
+    const sf::Color pitColour(sf::Color::Black);
+    const sf::Color pitBorder(sf::Color(60, 60, 60));
+
 };
 
 #endif // CONSTANTS_H

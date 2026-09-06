@@ -37,6 +37,10 @@ void SettingsManager::load()
             {
                 wrapAroundEnabled = (value == "1");
             }
+            else if (key == "holesEnabled")
+            {
+                holesEnabled = (value == "1");
+            }
         }
     }
 }
@@ -53,6 +57,7 @@ void SettingsManager::save()
 
     // Serialize settings as key=value pairs
     file << "wrapAroundEnabled=" << (wrapAroundEnabled ? "1" : "0") << "\n";
+    file << "holesEnabled=" << (holesEnabled ? "1" : "0") << "\n";
 
     file.close();
 }
@@ -69,6 +74,11 @@ std::string SettingsManager::getModeName() const
     if (wrapAroundEnabled)
     {
         activeMods.push_back("WRAP");
+    }
+
+    if (holesEnabled)
+    {
+        activeMods.push_back("HOLES");
     }
 
     if (activeMods.empty())
@@ -94,6 +104,11 @@ std::string SettingsManager::getScoreFilename() const
         scoreFilename += "_wrap";
     }
 
+    if (holesEnabled)
+    {
+        scoreFilename += "_holes";
+    }
+
     return scoreFilename + ".txt";
 }
 
@@ -102,4 +117,5 @@ std::string SettingsManager::getScoreFilename() const
 void SettingsManager::restoreDefaults()
 {
     wrapAroundEnabled = false;
+    holesEnabled = false;
 }

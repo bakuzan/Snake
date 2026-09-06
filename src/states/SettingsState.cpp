@@ -28,6 +28,12 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
         &settings.wrapAroundEnabled,
         gameData.gameFont,
         sf::Vector2f(0.f, 0.f));
+    toggleOptions.emplace_back(
+        "SpawnHoles",
+        "Spawn Holes",
+        &settings.holesEnabled,
+        gameData.gameFont,
+        sf::Vector2f(0.f, 0.f));
 
     // Add buttons
     buttons.emplace_back("Save", gameData.gameFont, "Save",

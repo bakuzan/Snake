@@ -36,6 +36,7 @@ private:
 
     Snake snake;
     Food food;
+    std::vector<sf::Vector2i> holes;
 
     int currentScore{0};
     float gameTimeSeconds{0.f};
@@ -58,6 +59,9 @@ private:
     void updateView();
     void renderGrid();
     void onPlayerDeath();
+    void spawnSingleHole();
+    void generateHoles(int count);
+    bool isCellOccupied(sf::Vector2i cell, bool includeSafeZone = false) const;
 };
 
 #endif // GAMESTATE_H

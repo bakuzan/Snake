@@ -32,7 +32,7 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
     inputManager.bind(Action::MOVE_DOWN, sf::Keyboard::S);
 
     // Setup entities
-    food.respawn(gridBounds, snake.getSegments());
+    food.respawn(gridBounds, snake.getSegments(), holes);
 
     updateView();
 
@@ -76,7 +76,13 @@ void GameState::update(sf::Time deltaTime)
         if (snake.getHeadPosition() == food.getPosition())
         {
             snake.grow();
-            food.respawn(gridBounds, snake.getSegments());
+
+            if (gameData.settingsManager.holesEnabled)
+            {
+                spawnSingleHole();
+            }
+
+            food.respawn(gridBounds, snake.getSegments(), holes);
 
             currentScore += 100;
             uiManager.setScore(currentScore);
@@ -126,6 +132,21 @@ void GameState::update(sf::Time deltaTime)
             }
         }
 
+        if (gameData.settingsManager.holesEnabled)
+        {
+            sf::Vector2i head = snake.getHeadPosition();
+
+            for (const auto &hole : holes)
+            {
+                if (head == hole)
+                {
+                    status = GameStatus::GAME_OVER;
+                    onPlayerDeath();
+                    return;
+                }
+            }
+        }
+
         if (snake.checkSelfCollision())
         {
             status = GameStatus::GAME_OVER;
@@ -149,6 +170,23 @@ void GameState::render()
     window.setView(gameView);
 
     renderGrid();
+
+    if (gameData.settingsManager.holesEnabled)
+    {
+        sf::RectangleShape holeShape(sf::Vector2f(Constants::CELL_SIZE, Constants::CELL_SIZE));
+        holeShape.setFillColor(Constants::pitColour);
+        holeShape.setOutlineThickness(-1.f);
+        holeShape.setOutlineColor(Constants::pitBorder);
+
+        for (const auto &hole : holes)
+        {
+            holeShape.setPosition(hole.x * Constants::CELL_SIZE,
+                                  hole.y * Constants::CELL_SIZE);
+
+            window.draw(holeShape);
+        }
+    }
+
     snake.render(window);
     food.render(window);
 
@@ -240,4 +278,117 @@ void GameState::onPlayerDeath()
 {
     GameOverStateConfig config = GameOverStateConfig::defaultValues(currentScore);
     stateManager.pushState(std::make_unique<GameOverState>(gameData, stateManager, window, config));
+}
+
+void GameState::spawnSingleHole()
+{
+    sf::Vector2i newHole;
+    bool validPosition = false;
+
+    while (!validPosition)
+    {
+        newHole.x = std::rand() % gridBounds.x;
+        newHole.y = std::rand() % gridBounds.y;
+        validPosition = true;
+
+        for (const auto &segment : snake.getSegments())
+        {
+            if (newHole == segment)
+            {
+                validPosition = false;
+                break;
+            }
+        }
+
+        if (!validPosition)
+        {
+            continue;
+        }
+
+        for (const auto &hole : holes)
+        {
+            if (newHole == hole)
+            {
+                validPosition = false;
+                break;
+            }
+        }
+
+        if (!validPosition)
+        {
+            continue;
+        }
+
+        if (newHole == food.getPosition())
+        {
+            validPosition = false;
+            continue;
+        }
+
+        sf::Vector2i head = snake.getHeadPosition();
+        if (std::abs(newHole.x - head.x) <= 2 &&
+            std::abs(newHole.y - head.y) <= 2)
+        {
+            validPosition = false;
+            continue;
+        }
+    }
+
+    holes.push_back(newHole);
+}
+
+void GameState::generateHoles(int count)
+{
+    holes.clear();
+
+    for (int i = 0; i < count; ++i)
+    {
+        sf::Vector2i newHole;
+        bool validPosition = false;
+
+        while (!validPosition)
+        {
+            newHole.x = std::rand() % gridBounds.x;
+            newHole.y = std::rand() % gridBounds.y;
+
+            if (!isCellOccupied(newHole, true))
+            {
+                validPosition = true;
+                holes.push_back(newHole);
+            }
+        }
+    }
+}
+
+bool GameState::isCellOccupied(sf::Vector2i cell, bool includeSafeZone) const
+{
+    for (const auto &segment : snake.getSegments())
+    {
+        if (cell == segment)
+        {
+            return true;
+        }
+    }
+
+    for (const auto &hole : holes)
+    {
+        if (cell == hole)
+        {
+            return true;
+        }
+    }
+
+    if (includeSafeZone)
+    {
+        sf::Vector2i startPos = snake.getHeadPosition();
+
+        // 3x3 exclusion zone
+        if (std::abs(cell.x - startPos.x) <= 3 &&
+            std::abs(cell.y - startPos.y) <= 3)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

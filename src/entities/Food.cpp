@@ -15,7 +15,9 @@ Food::~Food()
 
 // Publics
 
-void Food::respawn(sf::Vector2i gridBounds, const std::deque<sf::Vector2i> &snakeSegments)
+void Food::respawn(sf::Vector2i gridBounds,
+                   const std::deque<sf::Vector2i> &snakeSegments,
+                   const std::vector<sf::Vector2i> &holes)
 {
     std::uniform_int_distribution<int> distX(0, gridBounds.x - 1);
     std::uniform_int_distribution<int> distY(0, gridBounds.y - 1);
@@ -29,6 +31,20 @@ void Food::respawn(sf::Vector2i gridBounds, const std::deque<sf::Vector2i> &snak
         for (const auto &segment : snakeSegments)
         {
             if (segment == position)
+            {
+                validPosition = false;
+                break;
+            }
+        }
+
+        if (!validPosition)
+        {
+            continue;
+        }
+
+        for (const auto &hole : holes)
+        {
+            if (hole == position)
             {
                 validPosition = false;
                 break;

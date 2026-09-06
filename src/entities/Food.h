@@ -14,7 +14,9 @@ public:
     Food(float cellSize);
     ~Food();
 
-    void respawn(sf::Vector2i gridBounds, const std::deque<sf::Vector2i> &snakeSegments);
+    void respawn(sf::Vector2i gridBounds,
+                 const std::deque<sf::Vector2i> &snakeSegments,
+                 const std::vector<sf::Vector2i> &holes);
     sf::Vector2i getPosition() const;
     void render(sf::RenderTarget &target) const;
 
