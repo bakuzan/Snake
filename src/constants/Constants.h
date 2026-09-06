@@ -16,6 +16,9 @@ namespace Constants
     constexpr float CELL_SIZE = 32.0f;
     constexpr int GRID_WIDTH = 25;
 
+    // Other
+    constexpr float MAX_SPEED_LIMIT = 0.05f;
+
     // Colours
     const sf::Color cellColour(83, 86, 90);
     const sf::Color cellBorder(136, 139, 141);

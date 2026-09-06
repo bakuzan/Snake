@@ -14,6 +14,9 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
     window.setView(settingsView);
     sf::Vector2f viewSize = settingsView.getSize();
 
+    buttons.reserve(10);
+    toggleOptions.reserve(10);
+
     // Setup title
     gameTitle.setFont(gameData.gameFont);
     gameTitle.setString("Settings");
@@ -32,6 +35,12 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
         "SpawnHoles",
         "Spawn Holes",
         &settings.holesEnabled,
+        gameData.gameFont,
+        sf::Vector2f(0.f, 0.f));
+    toggleOptions.emplace_back(
+        "SpeedUp",
+        "Speed Up on Eat",
+        &settings.speedUpEnabled,
         gameData.gameFont,
         sf::Vector2f(0.f, 0.f));
 
@@ -60,12 +69,12 @@ SettingsState::~SettingsState()
 
 void SettingsState::handleEvent(const sf::Event &event)
 {
-    InputUtils::handleButtonEvent(event, buttons, window, selectedButtonIndex);
-
     for (auto &option : toggleOptions)
     {
         option.handleEvent(event, window);
     }
+
+    InputUtils::handleButtonEvent(event, buttons, window, selectedButtonIndex);
 }
 
 void SettingsState::handleWindowResize(sf::Vector2u newSize)

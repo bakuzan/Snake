@@ -15,6 +15,7 @@ public:
     // Data
     bool wrapAroundEnabled{false};
     bool holesEnabled{false};
+    bool speedUpEnabled{false};
 
 public:
     SettingsManager();

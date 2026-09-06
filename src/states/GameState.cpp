@@ -82,6 +82,16 @@ void GameState::update(sf::Time deltaTime)
                 spawnSingleHole();
             }
 
+            if (gameData.settingsManager.speedUpEnabled)
+            {
+                float currentSpeed = tickRate.asSeconds();
+
+                if (currentSpeed > Constants::MAX_SPEED_LIMIT)
+                {
+                    tickRate = sf::seconds(std::max(Constants::MAX_SPEED_LIMIT, currentSpeed - 0.005f));
+                }
+            }
+
             food.respawn(gridBounds, snake.getSegments(), holes);
 
             currentScore += 100;

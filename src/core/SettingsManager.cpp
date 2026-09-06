@@ -41,6 +41,10 @@ void SettingsManager::load()
             {
                 holesEnabled = (value == "1");
             }
+            else if (key == "speedUpEnabled")
+            {
+                speedUpEnabled = (value == "1");
+            }
         }
     }
 }
@@ -58,6 +62,7 @@ void SettingsManager::save()
     // Serialize settings as key=value pairs
     file << "wrapAroundEnabled=" << (wrapAroundEnabled ? "1" : "0") << "\n";
     file << "holesEnabled=" << (holesEnabled ? "1" : "0") << "\n";
+    file << "speedUpEnabled=" << (speedUpEnabled ? "1" : "0") << "\n";
 
     file.close();
 }
@@ -79,6 +84,11 @@ std::string SettingsManager::getModeName() const
     if (holesEnabled)
     {
         activeMods.push_back("HOLES");
+    }
+
+    if (speedUpEnabled)
+    {
+        activeMods.push_back("FAST");
     }
 
     if (activeMods.empty())
@@ -109,6 +119,11 @@ std::string SettingsManager::getScoreFilename() const
         scoreFilename += "_holes";
     }
 
+    if (speedUpEnabled)
+    {
+        scoreFilename += "_fast";
+    }
+
     return scoreFilename + ".txt";
 }
 
@@ -118,4 +133,5 @@ void SettingsManager::restoreDefaults()
 {
     wrapAroundEnabled = false;
     holesEnabled = false;
+    speedUpEnabled = false;
 }
