@@ -18,7 +18,8 @@ public:
                  const std::deque<sf::Vector2i> &snakeSegments,
                  const std::vector<sf::Vector2i> &holes);
     sf::Vector2i getPosition() const;
-    void render(sf::RenderTarget &target) const;
+    void render(sf::RenderTarget &target,
+                sf::Color foodColour = Constants::fruitColour) const;
 
 private:
     sf::Vector2i position{0, 0};

@@ -36,8 +36,16 @@ private:
 
     Snake snake;
     Food food;
+    Food specialFood;
     std::vector<sf::Vector2i> holes;
 
+    // Special food things
+    bool isSpecialFoodActive{false};
+    bool isGoldenFruit{true};                                                // Golden(Bonus) OR Poison(Penalty)
+    int specialFoodSpawnCountdown{Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN}; // Wait X snake steps before spawning
+    int specialFoodDuration{Constants::SPECIAL_FRUIT_DURATION};              // On screen for X snake steps
+
+    // Game meta
     int currentScore{0};
     float gameTimeSeconds{0.f};
 
@@ -58,6 +66,7 @@ private:
     void handlePlayerEvents(const sf::Event &event);
     void updateView();
     void renderGrid();
+    void renderSpecialFruit();
     void onPlayerDeath();
     void spawnSingleHole();
     void generateHoles(int count);

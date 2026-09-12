@@ -58,10 +58,10 @@ sf::Vector2i Food::getPosition() const
     return position;
 }
 
-void Food::render(sf::RenderTarget &target) const
+void Food::render(sf::RenderTarget &target, sf::Color foodColour) const
 {
     sf::RectangleShape shape(sf::Vector2f(cellSize - 1.f, cellSize - 1.f));
-    shape.setFillColor(Constants::fruitColour);
+    shape.setFillColor(foodColour);
     shape.setPosition(position.x * cellSize, position.y * cellSize);
     target.draw(shape);
 }

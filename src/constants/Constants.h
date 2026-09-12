@@ -18,12 +18,18 @@ namespace Constants
 
     // Other
     constexpr float MAX_SPEED_LIMIT = 0.05f;
+    constexpr int FRUIT_POINT_VALUE = 100;
+    constexpr int SPECIAL_FRUIT_SPAWN_COUNTDOWN = 40;
+    constexpr int SPECIAL_FRUIT_DURATION = 35;
 
     // Colours
     const sf::Color cellColour(83, 86, 90);
     const sf::Color cellBorder(136, 139, 141);
 
     const sf::Color fruitColour(199, 55, 47);
+    const sf::Color bonusFruitColour(sf::Color::Yellow);
+    const sf::Color poisonFruitColour(sf::Color(128, 0, 128));
+
     const sf::Color headColour(108, 187, 60);
     const sf::Color tailColour(121, 196, 74);
 

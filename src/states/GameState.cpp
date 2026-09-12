@@ -20,7 +20,8 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
       uiManager(&window, data),
       // Props
       snake(Constants::CELL_SIZE, {15, 10}),
-      food(Constants::CELL_SIZE)
+      food(Constants::CELL_SIZE),
+      specialFood(Constants::CELL_SIZE)
 {
     // Setup Input Manager
     inputManager.bind(Action::PAUSE, sf::Keyboard::Escape);
@@ -94,8 +95,53 @@ void GameState::update(sf::Time deltaTime)
 
             food.respawn(gridBounds, snake.getSegments(), holes);
 
-            currentScore += 100;
+            currentScore += Constants::FRUIT_POINT_VALUE;
             uiManager.setScore(currentScore);
+        }
+
+        if (!isSpecialFoodActive)
+        {
+            specialFoodSpawnCountdown--;
+
+            if (specialFoodSpawnCountdown <= 0)
+            {
+                isGoldenFruit = (std::rand() % 10 < 7);
+                specialFood.respawn(gridBounds, snake.getSegments(), holes);
+                isSpecialFoodActive = true;
+                specialFoodDuration = Constants::SPECIAL_FRUIT_DURATION;
+            }
+        }
+        else
+        {
+            specialFoodDuration--;
+
+            if (specialFoodDuration <= 0)
+            {
+                isSpecialFoodActive = false;
+                specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
+            }
+        }
+
+        if (isSpecialFoodActive &&
+            snake.getHeadPosition() == specialFood.getPosition())
+        {
+            if (isGoldenFruit)
+            {
+                currentScore += Constants::FRUIT_POINT_VALUE * 5;
+            }
+            else
+            {
+                currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
+                snake.grow();
+                if (gameData.settingsManager.holesEnabled)
+                {
+                    spawnSingleHole();
+                }
+            }
+
+            uiManager.setScore(currentScore);
+            isSpecialFoodActive = false;
+            specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
         }
 
         if (gameData.settingsManager.wrapAroundEnabled)
@@ -200,6 +246,11 @@ void GameState::render()
     snake.render(window);
     food.render(window);
 
+    if (isSpecialFoodActive)
+    {
+        renderSpecialFruit();
+    }
+
     // ---- UI Elements
     uiManager.render();
 }
@@ -282,6 +333,15 @@ void GameState::renderGrid()
             window.draw(cell);
         }
     }
+}
+
+void GameState::renderSpecialFruit()
+{
+    sf::Color specialColour = isGoldenFruit
+                                  ? Constants::bonusFruitColour
+                                  : Constants::poisonFruitColour;
+
+    specialFood.render(window, specialColour);
 }
 
 void GameState::onPlayerDeath()
