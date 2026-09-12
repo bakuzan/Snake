@@ -45,6 +45,10 @@ void SettingsManager::load()
             {
                 speedUpEnabled = (value == "1");
             }
+            else if (key == "specialFoodEnabled")
+            {
+                specialFoodEnabled = (value == "1");
+            }
         }
     }
 }
@@ -63,6 +67,7 @@ void SettingsManager::save()
     file << "wrapAroundEnabled=" << (wrapAroundEnabled ? "1" : "0") << "\n";
     file << "holesEnabled=" << (holesEnabled ? "1" : "0") << "\n";
     file << "speedUpEnabled=" << (speedUpEnabled ? "1" : "0") << "\n";
+    file << "specialFoodEnabled=" << (specialFoodEnabled ? "1" : "0") << "\n";
 
     file.close();
 }
@@ -89,6 +94,11 @@ std::string SettingsManager::getModeName() const
     if (speedUpEnabled)
     {
         activeMods.push_back("FAST");
+    }
+
+    if (specialFoodEnabled)
+    {
+        activeMods.push_back("SP FRUIT");
     }
 
     if (activeMods.empty())
@@ -124,6 +134,11 @@ std::string SettingsManager::getScoreFilename() const
         scoreFilename += "_fast";
     }
 
+    if (specialFoodEnabled)
+    {
+        scoreFilename += "_fruit";
+    }
+
     return scoreFilename + ".txt";
 }
 
@@ -134,4 +149,5 @@ void SettingsManager::restoreDefaults()
     wrapAroundEnabled = false;
     holesEnabled = false;
     speedUpEnabled = false;
+    specialFoodEnabled = false;
 }

@@ -16,6 +16,7 @@ public:
     bool wrapAroundEnabled{false};
     bool holesEnabled{false};
     bool speedUpEnabled{false};
+    bool specialFoodEnabled{false};
 
 public:
     SettingsManager();

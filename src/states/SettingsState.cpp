@@ -43,6 +43,12 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
         &settings.speedUpEnabled,
         gameData.gameFont,
         sf::Vector2f(0.f, 0.f));
+    toggleOptions.emplace_back(
+        "SpecialFruits",
+        "Special Fruits",
+        &settings.specialFoodEnabled,
+        gameData.gameFont,
+        sf::Vector2f(0.f, 0.f));
 
     // Add buttons
     buttons.emplace_back("Save", gameData.gameFont, "Save",

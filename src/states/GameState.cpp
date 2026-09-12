@@ -99,49 +99,52 @@ void GameState::update(sf::Time deltaTime)
             uiManager.setScore(currentScore);
         }
 
-        if (!isSpecialFoodActive)
+        if (gameData.settingsManager.specialFoodEnabled)
         {
-            specialFoodSpawnCountdown--;
-
-            if (specialFoodSpawnCountdown <= 0)
+            if (!isSpecialFoodActive)
             {
-                isGoldenFruit = (std::rand() % 10 < 7);
-                specialFood.respawn(gridBounds, snake.getSegments(), holes);
-                isSpecialFoodActive = true;
-                specialFoodDuration = Constants::SPECIAL_FRUIT_DURATION;
-            }
-        }
-        else
-        {
-            specialFoodDuration--;
+                specialFoodSpawnCountdown--;
 
-            if (specialFoodDuration <= 0)
-            {
-                isSpecialFoodActive = false;
-                specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
-            }
-        }
-
-        if (isSpecialFoodActive &&
-            snake.getHeadPosition() == specialFood.getPosition())
-        {
-            if (isGoldenFruit)
-            {
-                currentScore += Constants::FRUIT_POINT_VALUE * 5;
+                if (specialFoodSpawnCountdown <= 0)
+                {
+                    isGoldenFruit = (std::rand() % 10 < 7);
+                    specialFood.respawn(gridBounds, snake.getSegments(), holes);
+                    isSpecialFoodActive = true;
+                    specialFoodDuration = Constants::SPECIAL_FRUIT_DURATION;
+                }
             }
             else
             {
-                currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
-                snake.grow();
-                if (gameData.settingsManager.holesEnabled)
+                specialFoodDuration--;
+
+                if (specialFoodDuration <= 0)
                 {
-                    spawnSingleHole();
+                    isSpecialFoodActive = false;
+                    specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
                 }
             }
 
-            uiManager.setScore(currentScore);
-            isSpecialFoodActive = false;
-            specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
+            if (isSpecialFoodActive &&
+                snake.getHeadPosition() == specialFood.getPosition())
+            {
+                if (isGoldenFruit)
+                {
+                    currentScore += Constants::FRUIT_POINT_VALUE * 5;
+                }
+                else
+                {
+                    currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
+                    snake.grow();
+                    if (gameData.settingsManager.holesEnabled)
+                    {
+                        spawnSingleHole();
+                    }
+                }
+
+                uiManager.setScore(currentScore);
+                isSpecialFoodActive = false;
+                specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
+            }
         }
 
         if (gameData.settingsManager.wrapAroundEnabled)
@@ -246,7 +249,8 @@ void GameState::render()
     snake.render(window);
     food.render(window);
 
-    if (isSpecialFoodActive)
+    if (gameData.settingsManager.specialFoodEnabled &&
+        isSpecialFoodActive)
     {
         renderSpecialFruit();
     }
