@@ -30,7 +30,8 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
         {"WrapAround", "Wall Wrap-Around", &settings.wrapAroundEnabled},
         {"SpawnHoles", "Spawn Holes", &settings.holesEnabled},
         {"SpeedUp", "Speed Up on Eat", &settings.speedUpEnabled},
-        {"SpecialFruits", "Special Fruits", &settings.specialFoodEnabled}};
+        {"SpecialFruits", "Special Fruits", &settings.specialFoodEnabled},
+        {"Portals", "Portal Teleporters", &settings.portalsEnabled}};
 
     for (const auto &def : definitions)
     {

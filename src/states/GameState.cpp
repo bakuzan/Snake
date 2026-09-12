@@ -35,6 +35,11 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
     // Setup entities
     food.respawn(gridBounds, snake.getSegments(), holes);
 
+    if (gameData.settingsManager.portalsEnabled)
+    {
+        spawnPortals();
+    }
+
     updateView();
 
     // Start
@@ -206,6 +211,20 @@ void GameState::update(sf::Time deltaTime)
             }
         }
 
+        if (gameData.settingsManager.portalsEnabled)
+        {
+            sf::Vector2i head = snake.getHeadPosition();
+
+            if (head == portal1)
+            {
+                snake.setHeadPosition(portal2);
+            }
+            else if (head == portal2)
+            {
+                snake.setHeadPosition(portal1);
+            }
+        }
+
         if (snake.checkSelfCollision())
         {
             status = GameStatus::GAME_OVER;
@@ -244,6 +263,12 @@ void GameState::render()
 
             window.draw(holeShape);
         }
+    }
+
+    if (gameData.settingsManager.portalsEnabled)
+    {
+        renderPortal(portal1, Constants::portal1Colour);
+        renderPortal(portal2, Constants::portal2Colour);
     }
 
     snake.render(window);
@@ -348,6 +373,15 @@ void GameState::renderSpecialFruit()
     specialFood.render(window, specialColour);
 }
 
+void GameState::renderPortal(const sf::Vector2i &portal, sf::Color portalColour)
+{
+    sf::RectangleShape portalShape(sf::Vector2f(Constants::CELL_SIZE, Constants::CELL_SIZE));
+    portalShape.setPosition(portal.x * Constants::CELL_SIZE,
+                            portal.y * Constants::CELL_SIZE);
+    portalShape.setFillColor(portalColour);
+    window.draw(portalShape);
+}
+
 void GameState::onPlayerDeath()
 {
     GameOverStateConfig config = GameOverStateConfig::defaultValues(currentScore);
@@ -409,6 +443,65 @@ void GameState::spawnSingleHole()
     }
 
     holes.push_back(newHole);
+}
+
+void GameState::spawnPortals()
+{
+    auto getValidPosition = [this]() -> sf::Vector2i
+    {
+        sf::Vector2i pos;
+        bool valid;
+        do
+        {
+            valid = true;
+            pos.x = std::rand() % gridBounds.x;
+            pos.y = std::rand() % gridBounds.y;
+
+            // Ensure it doesn't spawn on the snake
+            for (const auto &segment : snake.getSegments())
+            {
+                if (pos == segment)
+                {
+                    valid = false;
+                }
+            }
+
+            // Ensure it doesn't spawn on holes
+            for (const auto &hole : holes)
+            {
+                if (pos == hole)
+                {
+                    valid = false;
+                }
+            }
+
+            if (pos == food.getPosition())
+            {
+                valid = false;
+            }
+
+            if (isSpecialFoodActive &&
+                pos == specialFood.getPosition())
+            {
+                valid = false;
+            }
+
+        } while (!valid);
+        return pos;
+    };
+
+    portal1 = getValidPosition();
+    portal2 = getValidPosition();
+
+    auto getManhattanDistance = [](sf::Vector2i a, sf::Vector2i b)
+    {
+        return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+    };
+
+    while (getManhattanDistance(portal1, portal2) < Constants::MIN_PORTAL_DISTANCE)
+    {
+        portal2 = getValidPosition();
+    }
 }
 
 void GameState::generateHoles(int count)

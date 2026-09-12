@@ -45,6 +45,10 @@ private:
     int specialFoodSpawnCountdown{Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN}; // Wait X snake steps before spawning
     int specialFoodDuration{Constants::SPECIAL_FRUIT_DURATION};              // On screen for X snake steps
 
+    // Portals
+    sf::Vector2i portal1;
+    sf::Vector2i portal2;
+
     // Game meta
     int currentScore{0};
     float gameTimeSeconds{0.f};
@@ -67,8 +71,10 @@ private:
     void updateView();
     void renderGrid();
     void renderSpecialFruit();
+    void renderPortal(const sf::Vector2i &portal, sf::Color portalColour);
     void onPlayerDeath();
     void spawnSingleHole();
+    void spawnPortals();
     void generateHoles(int count);
     bool isCellOccupied(sf::Vector2i cell, bool includeSafeZone = false) const;
 };

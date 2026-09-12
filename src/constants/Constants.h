@@ -21,6 +21,7 @@ namespace Constants
     constexpr int FRUIT_POINT_VALUE = 100;
     constexpr int SPECIAL_FRUIT_SPAWN_COUNTDOWN = 40;
     constexpr int SPECIAL_FRUIT_DURATION = 35;
+    constexpr int MIN_PORTAL_DISTANCE = 10;
 
     // Colours
     const sf::Color cellColour(83, 86, 90);
@@ -35,6 +36,9 @@ namespace Constants
 
     const sf::Color pitColour(sf::Color::Black);
     const sf::Color pitBorder(sf::Color(60, 60, 60));
+
+    const sf::Color portal1Colour(sf::Color(255, 165, 0));
+    const sf::Color portal2Colour(sf::Color::Blue);
 
 };
 

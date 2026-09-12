@@ -19,7 +19,8 @@ namespace
         {&SettingsManager::wrapAroundEnabled, "wrapAroundEnabled", "WRAP", "_wrap"},
         {&SettingsManager::holesEnabled, "holesEnabled", "HOLES", "_holes"},
         {&SettingsManager::speedUpEnabled, "speedUpEnabled", "FAST", "_fast"},
-        {&SettingsManager::specialFoodEnabled, "specialFoodEnabled", "SP FRUIT", "_fruit"}};
+        {&SettingsManager::specialFoodEnabled, "specialFoodEnabled", "SP FRUIT", "_fruit"},
+        {&SettingsManager::portalsEnabled, "portalsEnabled", "PORTALS", "_portals"}};
 }
 
 SettingsManager::SettingsManager()

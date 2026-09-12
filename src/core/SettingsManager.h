@@ -17,6 +17,7 @@ public:
     bool holesEnabled{false};
     bool speedUpEnabled{false};
     bool specialFoodEnabled{false};
+    bool portalsEnabled{false};
 
 public:
     SettingsManager();
