@@ -5,6 +5,23 @@
 
 #include "SettingsManager.h"
 
+namespace
+{
+    struct SettingDef
+    {
+        bool SettingsManager::*memberPtr;
+        const char *fileKey;
+        const char *modeName;
+        const char *scoreSuffix;
+    };
+
+    const SettingDef settingsConfig[] = {
+        {&SettingsManager::wrapAroundEnabled, "wrapAroundEnabled", "WRAP", "_wrap"},
+        {&SettingsManager::holesEnabled, "holesEnabled", "HOLES", "_holes"},
+        {&SettingsManager::speedUpEnabled, "speedUpEnabled", "FAST", "_fast"},
+        {&SettingsManager::specialFoodEnabled, "specialFoodEnabled", "SP FRUIT", "_fruit"}};
+}
+
 SettingsManager::SettingsManager()
 {
     load();
@@ -33,21 +50,13 @@ void SettingsManager::load()
         if (std::getline(iss, key, '=') &&
             std::getline(iss, value))
         {
-            if (key == "wrapAroundEnabled")
+            for (const auto &config : settingsConfig)
             {
-                wrapAroundEnabled = (value == "1");
-            }
-            else if (key == "holesEnabled")
-            {
-                holesEnabled = (value == "1");
-            }
-            else if (key == "speedUpEnabled")
-            {
-                speedUpEnabled = (value == "1");
-            }
-            else if (key == "specialFoodEnabled")
-            {
-                specialFoodEnabled = (value == "1");
+                if (key == config.fileKey)
+                {
+                    this->*(config.memberPtr) = (value == "1");
+                    break;
+                }
             }
         }
     }
@@ -64,10 +73,12 @@ void SettingsManager::save()
     }
 
     // Serialize settings as key=value pairs
-    file << "wrapAroundEnabled=" << (wrapAroundEnabled ? "1" : "0") << "\n";
-    file << "holesEnabled=" << (holesEnabled ? "1" : "0") << "\n";
-    file << "speedUpEnabled=" << (speedUpEnabled ? "1" : "0") << "\n";
-    file << "specialFoodEnabled=" << (specialFoodEnabled ? "1" : "0") << "\n";
+    for (const auto &config : settingsConfig)
+    {
+        file << config.fileKey << "="
+             << (this->*(config.memberPtr) ? "1" : "0")
+             << "\n";
+    }
 
     file.close();
 }
@@ -81,24 +92,12 @@ std::string SettingsManager::getModeName() const
 {
     std::vector<std::string> activeMods;
 
-    if (wrapAroundEnabled)
+    for (const auto &config : settingsConfig)
     {
-        activeMods.push_back("WRAP");
-    }
-
-    if (holesEnabled)
-    {
-        activeMods.push_back("HOLES");
-    }
-
-    if (speedUpEnabled)
-    {
-        activeMods.push_back("FAST");
-    }
-
-    if (specialFoodEnabled)
-    {
-        activeMods.push_back("SP FRUIT");
+        if (this->*(config.memberPtr))
+        {
+            activeMods.push_back(config.modeName);
+        }
     }
 
     if (activeMods.empty())
@@ -119,24 +118,12 @@ std::string SettingsManager::getScoreFilename() const
 {
     std::string scoreFilename = "highscores";
 
-    if (wrapAroundEnabled)
+    for (const auto &config : settingsConfig)
     {
-        scoreFilename += "_wrap";
-    }
-
-    if (holesEnabled)
-    {
-        scoreFilename += "_holes";
-    }
-
-    if (speedUpEnabled)
-    {
-        scoreFilename += "_fast";
-    }
-
-    if (specialFoodEnabled)
-    {
-        scoreFilename += "_fruit";
+        if (this->*(config.memberPtr))
+        {
+            scoreFilename += config.scoreSuffix;
+        }
     }
 
     return scoreFilename + ".txt";
@@ -146,8 +133,8 @@ std::string SettingsManager::getScoreFilename() const
 
 void SettingsManager::restoreDefaults()
 {
-    wrapAroundEnabled = false;
-    holesEnabled = false;
-    speedUpEnabled = false;
-    specialFoodEnabled = false;
+    for (const auto &config : settingsConfig)
+    {
+        this->*(config.memberPtr) = false;
+    }
 }

@@ -3,6 +3,7 @@
 
 #include "core/SettingsManager.h"
 #include "constants/Constants.h"
+#include "data/ToggleDef.h"
 #include "utils/InputUtils.h"
 
 SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWindow &win)
@@ -25,30 +26,21 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
 
     // Add options
     auto &settings = gameData.settingsManager;
-    toggleOptions.emplace_back(
-        "WrapAround",
-        "Wall Wrap-Around",
-        &settings.wrapAroundEnabled,
-        gameData.gameFont,
-        sf::Vector2f(0.f, 0.f));
-    toggleOptions.emplace_back(
-        "SpawnHoles",
-        "Spawn Holes",
-        &settings.holesEnabled,
-        gameData.gameFont,
-        sf::Vector2f(0.f, 0.f));
-    toggleOptions.emplace_back(
-        "SpeedUp",
-        "Speed Up on Eat",
-        &settings.speedUpEnabled,
-        gameData.gameFont,
-        sf::Vector2f(0.f, 0.f));
-    toggleOptions.emplace_back(
-        "SpecialFruits",
-        "Special Fruits",
-        &settings.specialFoodEnabled,
-        gameData.gameFont,
-        sf::Vector2f(0.f, 0.f));
+    const ToggleDef definitions[] = {
+        {"WrapAround", "Wall Wrap-Around", &settings.wrapAroundEnabled},
+        {"SpawnHoles", "Spawn Holes", &settings.holesEnabled},
+        {"SpeedUp", "Speed Up on Eat", &settings.speedUpEnabled},
+        {"SpecialFruits", "Special Fruits", &settings.specialFoodEnabled}};
+
+    for (const auto &def : definitions)
+    {
+        toggleOptions.emplace_back(
+            def.id,
+            def.label,
+            def.settingPtr,
+            gameData.gameFont,
+            sf::Vector2f(0.f, 0.f));
+    }
 
     // Add buttons
     buttons.emplace_back("Save", gameData.gameFont, "Save",
