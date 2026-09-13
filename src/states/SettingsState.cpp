@@ -31,7 +31,8 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
         {"SpawnHoles", "Spawn Holes", &settings.holesEnabled},
         {"SpeedUp", "Speed Up on Eat", &settings.speedUpEnabled},
         {"SpecialFruits", "Special Fruits", &settings.specialFoodEnabled},
-        {"Portals", "Portal Teleporters", &settings.portalsEnabled}};
+        {"Portals", "Portal Teleporters", &settings.portalsEnabled},
+        {"Obstacles", "Static Obstacles", &settings.obstaclesEnabled}};
 
     for (const auto &def : definitions)
     {

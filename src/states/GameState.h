@@ -77,6 +77,7 @@ private:
     void spawnPortals();
     void generateHoles(int count);
     bool isCellOccupied(sf::Vector2i cell, bool includeSafeZone = false) const;
+    bool isHolesEnabled();
 };
 
 #endif // GAMESTATE_H

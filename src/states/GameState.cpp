@@ -5,6 +5,7 @@
 #include "core/SettingsManager.h"
 #include "constants/AudioId.h"
 #include "constants/Constants.h"
+#include "components/ObstacleGenerator.h"
 #include "data/GameOverStateConfig.h"
 
 #include "GameState.h"
@@ -19,7 +20,7 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
       status(GameStatus::LOADING),
       uiManager(&window, data),
       // Props
-      snake(Constants::CELL_SIZE, {15, 10}),
+      snake(Constants::CELL_SIZE, {gridBounds.x / 2, gridBounds.y / 2}),
       food(Constants::CELL_SIZE),
       specialFood(Constants::CELL_SIZE)
 {
@@ -33,6 +34,12 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
     inputManager.bind(Action::MOVE_DOWN, sf::Keyboard::S);
 
     // Setup entities
+    if (gameData.settingsManager.obstaclesEnabled)
+    {
+        sf::Vector2i startPos = ObstacleGenerator::generateLayout(holes, gridBounds);
+        snake = Snake(Constants::CELL_SIZE, startPos);
+    }
+
     food.respawn(gridBounds, snake.getSegments(), holes);
 
     if (gameData.settingsManager.portalsEnabled)
@@ -196,7 +203,7 @@ void GameState::update(sf::Time deltaTime)
             }
         }
 
-        if (gameData.settingsManager.holesEnabled)
+        if (isHolesEnabled())
         {
             sf::Vector2i head = snake.getHeadPosition();
 
@@ -249,7 +256,7 @@ void GameState::render()
 
     renderGrid();
 
-    if (gameData.settingsManager.holesEnabled)
+    if (isHolesEnabled())
     {
         sf::RectangleShape holeShape(sf::Vector2f(Constants::CELL_SIZE, Constants::CELL_SIZE));
         holeShape.setFillColor(Constants::pitColour);
@@ -558,4 +565,10 @@ bool GameState::isCellOccupied(sf::Vector2i cell, bool includeSafeZone) const
     }
 
     return false;
+}
+
+bool GameState::isHolesEnabled()
+{
+    return gameData.settingsManager.holesEnabled ||
+           gameData.settingsManager.obstaclesEnabled;
 }
