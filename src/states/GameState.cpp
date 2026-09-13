@@ -86,6 +86,11 @@ void GameState::update(sf::Time deltaTime)
 
         snake.update();
 
+        if (ghostTicksRemaining > 0)
+        {
+            ghostTicksRemaining--;
+        }
+
         if (snake.getHeadPosition() == food.getPosition())
         {
             snake.grow();
@@ -119,7 +124,8 @@ void GameState::update(sf::Time deltaTime)
 
                 if (specialFoodSpawnCountdown <= 0)
                 {
-                    isGoldenFruit = (std::rand() % 10 < 7);
+                    updateSpecialFruitType();
+
                     specialFood.respawn(gridBounds, snake.getSegments(), holes);
                     isSpecialFoodActive = true;
                     specialFoodDuration = Constants::SPECIAL_FRUIT_DURATION;
@@ -139,11 +145,11 @@ void GameState::update(sf::Time deltaTime)
             if (isSpecialFoodActive &&
                 snake.getHeadPosition() == specialFood.getPosition())
             {
-                if (isGoldenFruit)
+                if (currentSpecialFruitType == SpecialFruitType::Golden)
                 {
                     currentScore += Constants::FRUIT_POINT_VALUE * 5;
                 }
-                else
+                else if (currentSpecialFruitType == SpecialFruitType::Poison)
                 {
                     currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
                     snake.grow();
@@ -151,6 +157,10 @@ void GameState::update(sf::Time deltaTime)
                     {
                         spawnSingleHole();
                     }
+                }
+                else if (currentSpecialFruitType == SpecialFruitType::Ghost)
+                {
+                    ghostTicksRemaining = Constants::GHOST_TICKS_DURATION;
                 }
 
                 uiManager.setScore(currentScore);
@@ -203,21 +213,6 @@ void GameState::update(sf::Time deltaTime)
             }
         }
 
-        if (isHolesEnabled())
-        {
-            sf::Vector2i head = snake.getHeadPosition();
-
-            for (const auto &hole : holes)
-            {
-                if (head == hole)
-                {
-                    status = GameStatus::GAME_OVER;
-                    onPlayerDeath();
-                    return;
-                }
-            }
-        }
-
         if (gameData.settingsManager.portalsEnabled)
         {
             sf::Vector2i head = snake.getHeadPosition();
@@ -232,11 +227,29 @@ void GameState::update(sf::Time deltaTime)
             }
         }
 
-        if (snake.checkSelfCollision())
+        if (ghostTicksRemaining <= 0)
         {
-            status = GameStatus::GAME_OVER;
-            onPlayerDeath();
-            return;
+            if (isHolesEnabled())
+            {
+                sf::Vector2i head = snake.getHeadPosition();
+
+                for (const auto &hole : holes)
+                {
+                    if (head == hole)
+                    {
+                        status = GameStatus::GAME_OVER;
+                        onPlayerDeath();
+                        return;
+                    }
+                }
+            }
+
+            if (snake.checkSelfCollision())
+            {
+                status = GameStatus::GAME_OVER;
+                onPlayerDeath();
+                return;
+            }
         }
     }
 
@@ -278,7 +291,7 @@ void GameState::render()
         renderPortal(portal2, Constants::portal2Colour);
     }
 
-    snake.render(window);
+    snake.render(window, ghostTicksRemaining);
     food.render(window);
 
     if (gameData.settingsManager.specialFoodEnabled &&
@@ -373,9 +386,20 @@ void GameState::renderGrid()
 
 void GameState::renderSpecialFruit()
 {
-    sf::Color specialColour = isGoldenFruit
-                                  ? Constants::bonusFruitColour
-                                  : Constants::poisonFruitColour;
+    sf::Color specialColour;
+
+    switch (currentSpecialFruitType)
+    {
+    case SpecialFruitType::Golden:
+        specialColour = Constants::bonusFruitColour;
+        break;
+    case SpecialFruitType::Poison:
+        specialColour = Constants::poisonFruitColour;
+        break;
+    case SpecialFruitType::Ghost:
+        specialColour = Constants::ghostFruitColour;
+        break;
+    }
 
     specialFood.render(window, specialColour);
 }
@@ -531,6 +555,24 @@ void GameState::generateHoles(int count)
                 holes.push_back(newHole);
             }
         }
+    }
+}
+
+void GameState::updateSpecialFruitType()
+{
+    int roll = std::rand() % 100;
+
+    if (snake.getSegments().size() > 15 && roll < 15) // 15% chance if long enough
+    {
+        currentSpecialFruitType = SpecialFruitType::Ghost;
+    }
+    else if (roll < 75) // ~60% Golden
+    {
+        currentSpecialFruitType = SpecialFruitType::Golden;
+    }
+    else // ~25% Poison
+    {
+        currentSpecialFruitType = SpecialFruitType::Poison;
     }
 }
 

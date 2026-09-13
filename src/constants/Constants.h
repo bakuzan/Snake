@@ -19,6 +19,7 @@ namespace Constants
     // Other
     constexpr float MAX_SPEED_LIMIT = 0.05f;
     constexpr int FRUIT_POINT_VALUE = 100;
+    constexpr int GHOST_TICKS_DURATION = 30;
     constexpr int SPECIAL_FRUIT_SPAWN_COUNTDOWN = 40;
     constexpr int SPECIAL_FRUIT_DURATION = 35;
     constexpr int MIN_PORTAL_DISTANCE = 10;
@@ -30,9 +31,10 @@ namespace Constants
     const sf::Color fruitColour(199, 55, 47);
     const sf::Color bonusFruitColour(sf::Color::Yellow);
     const sf::Color poisonFruitColour(sf::Color(128, 0, 128));
+    const sf::Color ghostFruitColour(sf::Color::White);
 
-    const sf::Color headColour(108, 187, 60);
-    const sf::Color tailColour(121, 196, 74);
+    const sf::Color snakeColour(108, 187, 60);
+    const sf::Color ghostColour(0, 255, 255, 128);
 
     const sf::Color pitColour(sf::Color::Black);
     const sf::Color pitBorder(sf::Color(60, 60, 60));

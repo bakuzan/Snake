@@ -12,6 +12,7 @@
 #include "components/UIManager.h"
 #include "constants/Constants.h"
 #include "constants/GameStatus.h"
+#include "constants/SpecialFruitType.h"
 #include "data/SaveData.h"
 #include "entities/Food.h"
 #include "entities/Snake.h"
@@ -41,7 +42,8 @@ private:
 
     // Special food things
     bool isSpecialFoodActive{false};
-    bool isGoldenFruit{true};                                                // Golden(Bonus) OR Poison(Penalty)
+    SpecialFruitType currentSpecialFruitType{SpecialFruitType::Golden};
+    int ghostTicksRemaining{0};
     int specialFoodSpawnCountdown{Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN}; // Wait X snake steps before spawning
     int specialFoodDuration{Constants::SPECIAL_FRUIT_DURATION};              // On screen for X snake steps
 
@@ -76,6 +78,7 @@ private:
     void spawnSingleHole();
     void spawnPortals();
     void generateHoles(int count);
+    void updateSpecialFruitType();
     bool isCellOccupied(sf::Vector2i cell, bool includeSafeZone = false) const;
     bool isHolesEnabled();
 };

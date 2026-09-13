@@ -117,22 +117,34 @@ bool Snake::isOpposite(Direction dir1, Direction dir2) const
            (dir1 == Direction::RIGHT && dir2 == Direction::LEFT);
 }
 
-void Snake::render(sf::RenderTarget &target) const
+void Snake::render(sf::RenderTarget &target,
+                   int ghostTicksRemaining) const
 {
+    bool isGhost = ghostTicksRemaining > 0;
+    bool isFlashing = isGhost &&
+                      ghostTicksRemaining <= 10 &&
+                      (ghostTicksRemaining % 4 < 2);
 
-    sf::RectangleShape shape(sf::Vector2f(cellSize - 1.f, cellSize - 1.f));
+    sf::Color colour = Constants::snakeColour;
 
-    for (size_t i = 0; i < body.size(); ++i)
+    if (isGhost)
     {
-        if (i == 0)
+        if (isFlashing)
         {
-            shape.setFillColor(Constants::headColour);
+            colour = Constants::snakeColour;
+            colour.a = Constants::ghostColour.a;
         }
         else
         {
-            shape.setFillColor(Constants::tailColour);
+            colour = Constants::ghostColour;
         }
+    }
 
+    sf::RectangleShape shape(sf::Vector2f(cellSize - 1.f, cellSize - 1.f));
+    shape.setFillColor(colour);
+
+    for (size_t i = 0; i < body.size(); ++i)
+    {
         shape.setPosition(body[i].x * cellSize, body[i].y * cellSize);
         target.draw(shape);
     }

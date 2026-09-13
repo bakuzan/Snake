@@ -25,7 +25,7 @@ public:
     void setHeadPosition(sf::Vector2i position);
     const std::deque<sf::Vector2i> &getSegments() const;
 
-    void render(sf::RenderTarget &target) const;
+    void render(sf::RenderTarget &target, int ghostTicksRemaining = 0) const;
 
 private:
     std::deque<sf::Vector2i> body;
