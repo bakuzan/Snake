@@ -32,7 +32,8 @@ SettingsState::SettingsState(GameData &data, StateManager &manager, sf::RenderWi
         {"SpeedUp", "Speed Up on Eat", &settings.speedUpEnabled},
         {"SpecialFruits", "Special Fruits", &settings.specialFoodEnabled},
         {"Portals", "Portal Teleporters", &settings.portalsEnabled},
-        {"Obstacles", "Static Obstacles", &settings.obstaclesEnabled}};
+        {"Obstacles", "Static Obstacles", &settings.obstaclesEnabled},
+        {"StrictTelefrag", "Strict Telefrag", &settings.strictGhostTelefragEnabled}};
 
     for (const auto &def : definitions)
     {

@@ -19,6 +19,7 @@ public:
     bool specialFoodEnabled{false};
     bool portalsEnabled{false};
     bool obstaclesEnabled{false};
+    bool strictGhostTelefragEnabled{false};
 
 public:
     SettingsManager();

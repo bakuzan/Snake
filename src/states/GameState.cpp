@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <format>
 #include <iostream>
 
@@ -86,9 +87,58 @@ void GameState::update(sf::Time deltaTime)
 
         snake.update();
 
+        bool justSolidified = false;
         if (ghostTicksRemaining > 0)
         {
             ghostTicksRemaining--;
+            if (ghostTicksRemaining == 0)
+            {
+                justSolidified = true;
+            }
+        }
+
+        if (justSolidified &&
+            gameData.settingsManager.strictGhostTelefragEnabled)
+        {
+            bool telefragged = false;
+            const auto &segments = snake.getSegments();
+
+            // Check if any body segment materialized inside a wall/hole
+            for (const auto &segment : segments)
+            {
+                if (std::find(holes.begin(), holes.end(), segment) != holes.end())
+                {
+                    telefragged = true;
+                    break;
+                }
+            }
+
+            // Check if the snake materialized inside its own body
+            if (!telefragged)
+            {
+                for (size_t i = 0; i < segments.size(); ++i)
+                {
+                    for (size_t j = i + 1; j < segments.size(); ++j)
+                    {
+                        if (segments[i] == segments[j])
+                        {
+                            telefragged = true;
+                            break;
+                        }
+                    }
+
+                    if (telefragged)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (telefragged)
+            {
+                onPlayerDeath();
+                return;
+            }
         }
 
         if (snake.getHeadPosition() == food.getPosition())
@@ -207,7 +257,6 @@ void GameState::update(sf::Time deltaTime)
         {
             if (checkWallCollision())
             {
-                status = GameStatus::GAME_OVER;
                 onPlayerDeath();
                 return;
             }
@@ -237,7 +286,6 @@ void GameState::update(sf::Time deltaTime)
                 {
                     if (head == hole)
                     {
-                        status = GameStatus::GAME_OVER;
                         onPlayerDeath();
                         return;
                     }
@@ -246,7 +294,6 @@ void GameState::update(sf::Time deltaTime)
 
             if (snake.checkSelfCollision())
             {
-                status = GameStatus::GAME_OVER;
                 onPlayerDeath();
                 return;
             }
@@ -415,6 +462,7 @@ void GameState::renderPortal(const sf::Vector2i &portal, sf::Color portalColour)
 
 void GameState::onPlayerDeath()
 {
+    status = GameStatus::GAME_OVER;
     GameOverStateConfig config = GameOverStateConfig::defaultValues(currentScore);
     stateManager.pushState(std::make_unique<GameOverState>(gameData, stateManager, window, config));
 }

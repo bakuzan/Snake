@@ -21,7 +21,8 @@ namespace
         {&SettingsManager::speedUpEnabled, "speedUpEnabled", "FAST", "_fast"},
         {&SettingsManager::specialFoodEnabled, "specialFoodEnabled", "SP FRUIT", "_fruit"},
         {&SettingsManager::portalsEnabled, "portalsEnabled", "PORTALS", "_portals"},
-        {&SettingsManager::obstaclesEnabled, "obstaclesEnabled", "OBSTACLES", "_obstacles"}};
+        {&SettingsManager::obstaclesEnabled, "obstaclesEnabled", "OBSTACLES", "_obstacles"},
+        {&SettingsManager::strictGhostTelefragEnabled, "strictGhostTelefragEnabled", "TELEFRAG", "_telefrag"}};
 }
 
 SettingsManager::SettingsManager()
