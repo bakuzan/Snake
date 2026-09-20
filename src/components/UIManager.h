@@ -28,7 +28,7 @@ public:
 
     // Access
     void setScore(int newScore);
-    void setTime(int totalSeconds);
+    void setTime(int totalSeconds, sf::Color colour = sf::Color::White);
 };
 
 #endif // UIMANAGER_H

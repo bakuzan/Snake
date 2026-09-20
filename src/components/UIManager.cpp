@@ -21,7 +21,7 @@ UIManager::UIManager(sf::RenderWindow *gameWindow, const GameData &data)
     modeText.setFont(gameData.gameFont);
     modeText.setCharacterSize(28);
     modeText.setFillColor(sf::Color::Yellow);
-    modeText.setString(gameData.settingsManager.getModeName());
+    modeText.setString(gameData.settingsManager.getModeName(gameData.getGameMode()));
 
     sf::Vector2u windowSize = window->getSize();
     handleResize(windowSize.x, windowSize.y);
@@ -88,10 +88,13 @@ void UIManager::setScore(int newScore)
     scoreText.setString(std::format("{:06}", newScore));
 }
 
-void UIManager::setTime(int totalSeconds)
+void UIManager::setTime(int totalSeconds, sf::Color colour)
 {
+    totalSeconds = std::max(0, totalSeconds);
+
     int minutes = totalSeconds / 60;
     int seconds = totalSeconds % 60;
 
     timerText.setString(std::format("{:02}:{:02}", minutes, seconds));
+    timerText.setFillColor(colour);
 }

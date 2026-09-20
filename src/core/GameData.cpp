@@ -22,6 +22,16 @@ GameData::~GameData()
 
 // Publics
 
+GameMode GameData::getGameMode() const
+{
+    return mode;
+}
+
+void GameData::setGameMode(GameMode chosenMode)
+{
+    mode = chosenMode;
+}
+
 // Resetting
 void GameData::reset()
 {

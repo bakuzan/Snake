@@ -91,35 +91,41 @@ void SettingsManager::reset()
     load();
 }
 
-std::string SettingsManager::getModeName() const
+std::string SettingsManager::getModeName(GameMode currentMode) const
 {
-    std::vector<std::string> activeMods;
+    std::string modifiers = "";
+    std::string uiName = (currentMode == GameMode::TIME_ATTACK)
+                             ? "TIME ATTACK"
+                             : "CLASSIC";
 
+    bool first = true;
     for (const auto &config : settingsConfig)
     {
         if (this->*(config.memberPtr))
         {
-            activeMods.push_back(config.modeName);
+            if (!first)
+            {
+                modifiers += " + ";
+            }
+
+            modifiers += config.modeName;
+            first = false;
         }
     }
 
-    if (activeMods.empty())
+    if (!modifiers.empty())
     {
-        return "CLASSIC";
+        uiName += " [" + modifiers + "]";
     }
 
-    std::string result = activeMods[0];
-    for (size_t i = 1; i < activeMods.size(); ++i)
-    {
-        result += " + " + activeMods[i];
-    }
-
-    return result;
+    return uiName;
 }
 
-std::string SettingsManager::getScoreFilename() const
+std::string SettingsManager::getScoreFilename(GameMode currentMode) const
 {
-    std::string scoreFilename = "highscores";
+    std::string scoreFilename = (currentMode == GameMode::TIME_ATTACK)
+                                    ? "highscores_timeattack"
+                                    : "highscores";
 
     for (const auto &config : settingsConfig)
     {

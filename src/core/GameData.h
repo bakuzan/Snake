@@ -12,6 +12,7 @@
 
 #include "TextureManager.h"
 #include "AudioManager.h"
+#include "constants/GameMode.h"
 #include "core/SettingsManager.h"
 
 class GameData
@@ -24,9 +25,14 @@ public:
     AudioManager audioManager;
     SettingsManager settingsManager;
 
+    GameMode mode;
+
 public:
     GameData();
     ~GameData();
+
+    GameMode getGameMode() const;
+    void setGameMode(GameMode chosenMode);
 
     // Resetters
     void reset();

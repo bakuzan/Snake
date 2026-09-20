@@ -54,6 +54,7 @@ private:
     // Game meta
     int currentScore{0};
     float gameTimeSeconds{0.f};
+    float timeRemaining{Constants::TIME_ATTACK_START_TIME}; // Time Attack state
 
 public:
     GameState(GameData &data, StateManager &manager, sf::RenderWindow &win,
@@ -79,6 +80,7 @@ private:
     void spawnPortals();
     void generateHoles(int count);
     void updateSpecialFruitType();
+    void incrementTimeRemaining(float increment);
     bool isCellOccupied(sf::Vector2i cell, bool includeSafeZone = false) const;
     bool isHolesEnabled();
 };

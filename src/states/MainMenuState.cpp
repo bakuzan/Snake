@@ -19,9 +19,15 @@ MainMenuState::MainMenuState(GameData &data, StateManager &manager, sf::RenderWi
     gameTitle.setFillColor(sf::Color::White);
 
     // Add buttons
-    addButton("New", "New Game",
+    addButton("Classic", "Classic",
               [this]()
               {  gameData.reset(); 
+                gameData.setGameMode(GameMode::CLASSIC);
+                stateManager.changeState(std::make_unique<GameState>(gameData, stateManager, window, SaveData::makeDefault())); });
+    addButton("TimeAttack", "Time Attack",
+              [this]()
+              {  gameData.reset(); 
+                gameData.setGameMode(GameMode::TIME_ATTACK);
                 stateManager.changeState(std::make_unique<GameState>(gameData, stateManager, window, SaveData::makeDefault())); });
     addButton("Settings", "Settings",
               [this]()

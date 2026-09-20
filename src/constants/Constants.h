@@ -23,6 +23,9 @@ namespace Constants
     constexpr int SPECIAL_FRUIT_SPAWN_COUNTDOWN = 40;
     constexpr int SPECIAL_FRUIT_DURATION = 35;
     constexpr int MIN_PORTAL_DISTANCE = 10;
+    constexpr float TIME_ATTACK_START_TIME = 60.f;
+    constexpr float TIME_ATTACK_MAX_TIME = 90.f;
+    constexpr float TIME_ATTACK_INCREMENT = 2.5f;
 
     // Colours
     const sf::Color cellColour(83, 86, 90);

@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "constants/GameMode.h"
+
 class SettingsManager
 {
 private:
@@ -29,8 +31,8 @@ public:
     void save();
     void reset();
 
-    std::string getModeName() const;
-    std::string getScoreFilename() const;
+    std::string getModeName(GameMode currentMode) const;
+    std::string getScoreFilename(GameMode currentMode) const;
 };
 
 #endif // SETTINGSMANAGER_H

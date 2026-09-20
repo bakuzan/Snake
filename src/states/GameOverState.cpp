@@ -20,7 +20,7 @@ GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWi
     window.setView(gameOverView);
 
     // Load existing high scores
-    highScoreManager.loadFromFile(gameData.settingsManager.getScoreFilename());
+    highScoreManager.loadFromFile(gameData.settingsManager.getScoreFilename(gameData.getGameMode()));
 
     // Check if score qualifies for high score list
     if (highScoreManager.isHighScore(stateConfig.score))
@@ -54,7 +54,7 @@ GameOverState::GameOverState(GameData &data, StateManager &manager, sf::RenderWi
     modeText.setFont(gameData.gameFont);
     modeText.setCharacterSize(36);
     modeText.setFillColor(sf::Color::Yellow);
-    modeText.setString(gameData.settingsManager.getModeName());
+    modeText.setString(gameData.settingsManager.getModeName(gameData.getGameMode()));
 
     leaderboardText.setFont(gameData.gameFont);
     leaderboardText.setCharacterSize(36);
@@ -107,7 +107,7 @@ void GameOverState::handleEvent(const sf::Event &event)
                      playerInitials.length() == 3)
             {
                 highScoreManager.addScore(playerInitials, stateConfig.score);
-                highScoreManager.saveToFile(gameData.settingsManager.getScoreFilename());
+                highScoreManager.saveToFile(gameData.settingsManager.getScoreFilename(gameData.getGameMode()));
 
                 isEnteringInitials = false;
 

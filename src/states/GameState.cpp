@@ -6,6 +6,7 @@
 #include "core/SettingsManager.h"
 #include "constants/AudioId.h"
 #include "constants/Constants.h"
+#include "constants/GameMode.h"
 #include "components/ObstacleGenerator.h"
 #include "data/GameOverStateConfig.h"
 
@@ -77,8 +78,27 @@ void GameState::handleWindowResize(sf::Vector2u newSize)
 
 void GameState::update(sf::Time deltaTime)
 {
-    gameTimeSeconds += deltaTime.asSeconds();
-    uiManager.setTime(static_cast<int>(gameTimeSeconds));
+    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+    {
+        timeRemaining -= deltaTime.asSeconds();
+        sf::Color timerColor = (timeRemaining <= 10.0f)
+                                   ? sf::Color::Red
+                                   : sf::Color::White;
+
+        uiManager.setTime(static_cast<int>(timeRemaining), timerColor);
+
+        if (timeRemaining <= 0.0f)
+        {
+            timeRemaining = 0.0f;
+            onPlayerDeath();
+            return;
+        }
+    }
+    else
+    {
+        gameTimeSeconds += deltaTime.asSeconds();
+        uiManager.setTime(static_cast<int>(gameTimeSeconds));
+    }
 
     tickAccumulator += deltaTime;
     while (tickAccumulator >= tickRate)
@@ -160,6 +180,11 @@ void GameState::update(sf::Time deltaTime)
                 }
             }
 
+            if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+            {
+                incrementTimeRemaining(Constants::TIME_ATTACK_INCREMENT);
+            }
+
             food.respawn(gridBounds, snake.getSegments(), holes);
 
             currentScore += Constants::FRUIT_POINT_VALUE;
@@ -198,11 +223,22 @@ void GameState::update(sf::Time deltaTime)
                 if (currentSpecialFruitType == SpecialFruitType::Golden)
                 {
                     currentScore += Constants::FRUIT_POINT_VALUE * 5;
+
+                    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+                    {
+                        incrementTimeRemaining(Constants::TIME_ATTACK_INCREMENT * 2);
+                    }
                 }
                 else if (currentSpecialFruitType == SpecialFruitType::Poison)
                 {
                     currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
                     snake.grow();
+
+                    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+                    {
+                        incrementTimeRemaining(-Constants::TIME_ATTACK_INCREMENT);
+                    }
+
                     if (gameData.settingsManager.holesEnabled)
                     {
                         spawnSingleHole();
@@ -301,6 +337,16 @@ void GameState::update(sf::Time deltaTime)
     }
 
     uiManager.update();
+}
+
+void GameState::incrementTimeRemaining(float increment)
+{
+    timeRemaining += increment;
+
+    if (timeRemaining > Constants::TIME_ATTACK_MAX_TIME)
+    {
+        timeRemaining = Constants::TIME_ATTACK_MAX_TIME;
+    }
 }
 
 void GameState::render()
