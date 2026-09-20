@@ -67,6 +67,12 @@ public:
     void render() override;
 
 private:
+    bool handleTimers(sf::Time deltaTime);
+    bool handleGhostSolidification();
+    void handleItemConsumption();
+    bool handleBoundariesAndPortals();
+    bool checkEndTickDeathConditions();
+
     bool checkWallCollision() const;
 
     void handleSystemEvents(const sf::Event &event);

@@ -78,26 +78,9 @@ void GameState::handleWindowResize(sf::Vector2u newSize)
 
 void GameState::update(sf::Time deltaTime)
 {
-    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+    if (handleTimers(deltaTime))
     {
-        timeRemaining -= deltaTime.asSeconds();
-        sf::Color timerColor = (timeRemaining <= 10.0f)
-                                   ? sf::Color::Red
-                                   : sf::Color::White;
-
-        uiManager.setTime(static_cast<int>(timeRemaining), timerColor);
-
-        if (timeRemaining <= 0.0f)
-        {
-            timeRemaining = 0.0f;
-            onPlayerDeath();
-            return;
-        }
-    }
-    else
-    {
-        gameTimeSeconds += deltaTime.asSeconds();
-        uiManager.setTime(static_cast<int>(gameTimeSeconds));
+        return;
     }
 
     tickAccumulator += deltaTime;
@@ -107,232 +90,21 @@ void GameState::update(sf::Time deltaTime)
 
         snake.update();
 
-        bool justSolidified = false;
-        if (ghostTicksRemaining > 0)
+        if (handleGhostSolidification())
         {
-            ghostTicksRemaining--;
-            if (ghostTicksRemaining == 0)
-            {
-                justSolidified = true;
-            }
+            return;
         }
 
-        if (justSolidified &&
-            gameData.settingsManager.strictGhostTelefragEnabled)
+        handleItemConsumption();
+
+        if (handleBoundariesAndPortals())
         {
-            bool telefragged = false;
-            const auto &segments = snake.getSegments();
-
-            // Check if any body segment materialized inside a wall/hole
-            for (const auto &segment : segments)
-            {
-                if (std::find(holes.begin(), holes.end(), segment) != holes.end())
-                {
-                    telefragged = true;
-                    break;
-                }
-            }
-
-            // Check if the snake materialized inside its own body
-            if (!telefragged)
-            {
-                for (size_t i = 0; i < segments.size(); ++i)
-                {
-                    for (size_t j = i + 1; j < segments.size(); ++j)
-                    {
-                        if (segments[i] == segments[j])
-                        {
-                            telefragged = true;
-                            break;
-                        }
-                    }
-
-                    if (telefragged)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if (telefragged)
-            {
-                onPlayerDeath();
-                return;
-            }
+            return;
         }
 
-        if (snake.getHeadPosition() == food.getPosition())
+        if (checkEndTickDeathConditions())
         {
-            snake.grow();
-
-            if (gameData.settingsManager.holesEnabled)
-            {
-                spawnSingleHole();
-            }
-
-            if (gameData.settingsManager.speedUpEnabled)
-            {
-                float currentSpeed = tickRate.asSeconds();
-
-                if (currentSpeed > Constants::MAX_SPEED_LIMIT)
-                {
-                    tickRate = sf::seconds(std::max(Constants::MAX_SPEED_LIMIT, currentSpeed - 0.005f));
-                }
-            }
-
-            if (gameData.getGameMode() == GameMode::TIME_ATTACK)
-            {
-                incrementTimeRemaining(Constants::TIME_ATTACK_INCREMENT);
-            }
-
-            food.respawn(gridBounds, snake.getSegments(), holes);
-
-            currentScore += Constants::FRUIT_POINT_VALUE;
-            uiManager.setScore(currentScore);
-        }
-
-        if (gameData.settingsManager.specialFoodEnabled)
-        {
-            if (!isSpecialFoodActive)
-            {
-                specialFoodSpawnCountdown--;
-
-                if (specialFoodSpawnCountdown <= 0)
-                {
-                    updateSpecialFruitType();
-
-                    specialFood.respawn(gridBounds, snake.getSegments(), holes);
-                    isSpecialFoodActive = true;
-                    specialFoodDuration = Constants::SPECIAL_FRUIT_DURATION;
-                }
-            }
-            else
-            {
-                specialFoodDuration--;
-
-                if (specialFoodDuration <= 0)
-                {
-                    isSpecialFoodActive = false;
-                    specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
-                }
-            }
-
-            if (isSpecialFoodActive &&
-                snake.getHeadPosition() == specialFood.getPosition())
-            {
-                if (currentSpecialFruitType == SpecialFruitType::Golden)
-                {
-                    currentScore += Constants::FRUIT_POINT_VALUE * 5;
-
-                    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
-                    {
-                        incrementTimeRemaining(Constants::TIME_ATTACK_INCREMENT * 2);
-                    }
-                }
-                else if (currentSpecialFruitType == SpecialFruitType::Poison)
-                {
-                    currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
-                    snake.grow();
-
-                    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
-                    {
-                        incrementTimeRemaining(-Constants::TIME_ATTACK_INCREMENT);
-                    }
-
-                    if (gameData.settingsManager.holesEnabled)
-                    {
-                        spawnSingleHole();
-                    }
-                }
-                else if (currentSpecialFruitType == SpecialFruitType::Ghost)
-                {
-                    ghostTicksRemaining = Constants::GHOST_TICKS_DURATION;
-                }
-
-                uiManager.setScore(currentScore);
-                isSpecialFoodActive = false;
-                specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
-            }
-        }
-
-        if (gameData.settingsManager.wrapAroundEnabled)
-        {
-            sf::Vector2i head = snake.getHeadPosition();
-            bool wrapped = false;
-
-            // Check horizontal bounds
-            if (head.x < 0)
-            {
-                head.x = gridBounds.x - 1;
-                wrapped = true;
-            }
-            else if (head.x >= gridBounds.x)
-            {
-                head.x = 0;
-                wrapped = true;
-            }
-
-            // Check vertical bounds
-            if (head.y < 0)
-            {
-                head.y = gridBounds.y - 1;
-                wrapped = true;
-            }
-            else if (head.y >= gridBounds.y)
-            {
-                head.y = 0;
-                wrapped = true;
-            }
-
-            if (wrapped)
-            {
-                snake.setHeadPosition(head);
-            }
-        }
-        else
-        {
-            if (checkWallCollision())
-            {
-                onPlayerDeath();
-                return;
-            }
-        }
-
-        if (gameData.settingsManager.portalsEnabled)
-        {
-            sf::Vector2i head = snake.getHeadPosition();
-
-            if (head == portal1)
-            {
-                snake.setHeadPosition(portal2);
-            }
-            else if (head == portal2)
-            {
-                snake.setHeadPosition(portal1);
-            }
-        }
-
-        if (ghostTicksRemaining <= 0)
-        {
-            if (isHolesEnabled())
-            {
-                sf::Vector2i head = snake.getHeadPosition();
-
-                for (const auto &hole : holes)
-                {
-                    if (head == hole)
-                    {
-                        onPlayerDeath();
-                        return;
-                    }
-                }
-            }
-
-            if (snake.checkSelfCollision())
-            {
-                onPlayerDeath();
-                return;
-            }
+            return;
         }
     }
 
@@ -398,6 +170,267 @@ void GameState::render()
 }
 
 // Privates
+
+bool GameState::handleTimers(sf::Time deltaTime)
+{
+    if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+    {
+        timeRemaining -= deltaTime.asSeconds();
+        sf::Color timerColor = (timeRemaining <= 10.0f)
+                                   ? sf::Color::Red
+                                   : sf::Color::White;
+
+        uiManager.setTime(static_cast<int>(timeRemaining), timerColor);
+
+        if (timeRemaining <= 0.0f)
+        {
+            timeRemaining = 0.0f;
+            onPlayerDeath();
+            return true;
+        }
+    }
+    else
+    {
+        gameTimeSeconds += deltaTime.asSeconds();
+        uiManager.setTime(static_cast<int>(gameTimeSeconds));
+    }
+    return false;
+}
+
+bool GameState::handleGhostSolidification()
+{
+    bool justSolidified = false;
+    if (ghostTicksRemaining > 0)
+    {
+        ghostTicksRemaining--;
+        if (ghostTicksRemaining == 0)
+        {
+            justSolidified = true;
+        }
+    }
+
+    if (justSolidified &&
+        gameData.settingsManager.strictGhostTelefragEnabled)
+    {
+        bool telefragged = false;
+        const auto &segments = snake.getSegments();
+
+        for (const auto &segment : segments)
+        {
+            if (std::find(holes.begin(), holes.end(), segment) != holes.end())
+            {
+                telefragged = true;
+                break;
+            }
+        }
+
+        if (!telefragged)
+        {
+            for (size_t i = 0; i < segments.size(); ++i)
+            {
+                for (size_t j = i + 1; j < segments.size(); ++j)
+                {
+                    if (segments[i] == segments[j])
+                    {
+                        telefragged = true;
+                        break;
+                    }
+                }
+
+                if (telefragged)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (telefragged)
+        {
+            onPlayerDeath();
+            return true;
+        }
+    }
+    return false;
+}
+
+void GameState::handleItemConsumption()
+{
+    if (snake.getHeadPosition() == food.getPosition())
+    {
+        snake.grow();
+
+        if (gameData.settingsManager.holesEnabled)
+        {
+            spawnSingleHole();
+        }
+
+        if (gameData.settingsManager.speedUpEnabled)
+        {
+            float currentSpeed = tickRate.asSeconds();
+
+            if (currentSpeed > Constants::MAX_SPEED_LIMIT)
+            {
+                tickRate = sf::seconds(std::max(Constants::MAX_SPEED_LIMIT, currentSpeed - 0.005f));
+            }
+        }
+
+        if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+        {
+            incrementTimeRemaining(Constants::TIME_ATTACK_INCREMENT);
+        }
+
+        food.respawn(gridBounds, snake.getSegments(), holes);
+        currentScore += Constants::FRUIT_POINT_VALUE;
+        uiManager.setScore(currentScore);
+    }
+
+    // Special Food
+    if (gameData.settingsManager.specialFoodEnabled)
+    {
+        if (!isSpecialFoodActive)
+        {
+            specialFoodSpawnCountdown--;
+            if (specialFoodSpawnCountdown <= 0)
+            {
+                updateSpecialFruitType();
+                specialFood.respawn(gridBounds, snake.getSegments(), holes);
+                isSpecialFoodActive = true;
+                specialFoodDuration = Constants::SPECIAL_FRUIT_DURATION;
+            }
+        }
+        else
+        {
+            specialFoodDuration--;
+            if (specialFoodDuration <= 0)
+            {
+                isSpecialFoodActive = false;
+                specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
+            }
+        }
+
+        if (isSpecialFoodActive &&
+            snake.getHeadPosition() == specialFood.getPosition())
+        {
+            if (currentSpecialFruitType == SpecialFruitType::Golden)
+            {
+                currentScore += Constants::FRUIT_POINT_VALUE * 5;
+
+                if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+                {
+                    incrementTimeRemaining(Constants::TIME_ATTACK_INCREMENT * 2);
+                }
+            }
+            else if (currentSpecialFruitType == SpecialFruitType::Poison)
+            {
+                currentScore = std::max(0, currentScore - Constants::FRUIT_POINT_VALUE * 2);
+                snake.grow();
+
+                if (gameData.getGameMode() == GameMode::TIME_ATTACK)
+                {
+                    incrementTimeRemaining(-Constants::TIME_ATTACK_INCREMENT);
+                }
+
+                if (gameData.settingsManager.holesEnabled)
+                {
+                    spawnSingleHole();
+                }
+            }
+            else if (currentSpecialFruitType == SpecialFruitType::Ghost)
+            {
+                ghostTicksRemaining = Constants::GHOST_TICKS_DURATION;
+            }
+
+            uiManager.setScore(currentScore);
+            isSpecialFoodActive = false;
+            specialFoodSpawnCountdown = Constants::SPECIAL_FRUIT_SPAWN_COUNTDOWN;
+        }
+    }
+}
+
+bool GameState::handleBoundariesAndPortals()
+{
+    if (gameData.settingsManager.wrapAroundEnabled)
+    {
+        sf::Vector2i head = snake.getHeadPosition();
+        bool wrapped = false;
+
+        if (head.x < 0)
+        {
+            head.x = gridBounds.x - 1;
+            wrapped = true;
+        }
+        else if (head.x >= gridBounds.x)
+        {
+            head.x = 0;
+            wrapped = true;
+        }
+
+        if (head.y < 0)
+        {
+            head.y = gridBounds.y - 1;
+            wrapped = true;
+        }
+        else if (head.y >= gridBounds.y)
+        {
+            head.y = 0;
+            wrapped = true;
+        }
+
+        if (wrapped)
+        {
+            snake.setHeadPosition(head);
+        }
+    }
+    else
+    {
+        if (checkWallCollision())
+        {
+            onPlayerDeath();
+            return true;
+        }
+    }
+
+    if (gameData.settingsManager.portalsEnabled)
+    {
+        sf::Vector2i head = snake.getHeadPosition();
+        if (head == portal1)
+        {
+            snake.setHeadPosition(portal2);
+        }
+        else if (head == portal2)
+        {
+            snake.setHeadPosition(portal1);
+        }
+    }
+
+    return false;
+}
+
+bool GameState::checkEndTickDeathConditions()
+{
+    if (ghostTicksRemaining <= 0)
+    {
+        if (isHolesEnabled())
+        {
+            sf::Vector2i head = snake.getHeadPosition();
+            for (const auto &hole : holes)
+            {
+                if (head == hole)
+                {
+                    onPlayerDeath();
+                    return true;
+                }
+            }
+        }
+
+        if (snake.checkSelfCollision())
+        {
+            onPlayerDeath();
+            return true;
+        }
+    }
+    return false;
+}
 
 bool GameState::checkWallCollision() const
 {
