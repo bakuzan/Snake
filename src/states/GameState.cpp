@@ -555,48 +555,20 @@ void GameState::spawnSingleHole()
     {
         newHole.x = std::rand() % gridBounds.x;
         newHole.y = std::rand() % gridBounds.y;
-        validPosition = true;
 
-        for (const auto &segment : snake.getSegments())
+        // Check if the cell is free of the snake, other holes, and the head's safe zone
+        if (!isCellOccupied(newHole, true))
         {
-            if (newHole == segment)
+            // Also ensure it doesn't land on any food or portals
+            bool onFood = (newHole == food.getPosition());
+            bool onSpecial = (isSpecialFoodActive && newHole == specialFood.getPosition());
+            bool onPortal = (gameData.settingsManager.portalsEnabled &&
+                             (newHole == portal1 || newHole == portal2));
+
+            if (!onFood && !onSpecial && !onPortal)
             {
-                validPosition = false;
-                break;
+                validPosition = true;
             }
-        }
-
-        if (!validPosition)
-        {
-            continue;
-        }
-
-        for (const auto &hole : holes)
-        {
-            if (newHole == hole)
-            {
-                validPosition = false;
-                break;
-            }
-        }
-
-        if (!validPosition)
-        {
-            continue;
-        }
-
-        if (newHole == food.getPosition())
-        {
-            validPosition = false;
-            continue;
-        }
-
-        sf::Vector2i head = snake.getHeadPosition();
-        if (std::abs(newHole.x - head.x) <= 2 &&
-            std::abs(newHole.y - head.y) <= 2)
-        {
-            validPosition = false;
-            continue;
         }
     }
 
@@ -608,43 +580,25 @@ void GameState::spawnPortals()
     auto getValidPosition = [this]() -> sf::Vector2i
     {
         sf::Vector2i pos;
-        bool valid;
-        do
+        bool valid = false;
+
+        while (!valid)
         {
-            valid = true;
             pos.x = std::rand() % gridBounds.x;
             pos.y = std::rand() % gridBounds.y;
 
-            // Ensure it doesn't spawn on the snake
-            for (const auto &segment : snake.getSegments())
+            // Check if cell is free of snake and holes
+            if (!isCellOccupied(pos, false))
             {
-                if (pos == segment)
+                bool onFood = (pos == food.getPosition());
+                bool onSpecial = (isSpecialFoodActive && pos == specialFood.getPosition());
+
+                if (!onFood && !onSpecial)
                 {
-                    valid = false;
+                    valid = true;
                 }
             }
-
-            // Ensure it doesn't spawn on holes
-            for (const auto &hole : holes)
-            {
-                if (pos == hole)
-                {
-                    valid = false;
-                }
-            }
-
-            if (pos == food.getPosition())
-            {
-                valid = false;
-            }
-
-            if (isSpecialFoodActive &&
-                pos == specialFood.getPosition())
-            {
-                valid = false;
-            }
-
-        } while (!valid);
+        }
         return pos;
     };
 
@@ -656,6 +610,7 @@ void GameState::spawnPortals()
         return std::abs(a.x - b.x) + std::abs(a.y - b.y);
     };
 
+    // Ensure portals aren't spawned right next to each other
     while (getManhattanDistance(portal1, portal2) < Constants::MIN_PORTAL_DISTANCE)
     {
         portal2 = getValidPosition();
