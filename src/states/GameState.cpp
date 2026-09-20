@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <format>
 #include <iostream>
+#include <unordered_set>
 
 #include "utils/InputUtils.h"
 #include "core/SettingsManager.h"
@@ -216,6 +217,7 @@ bool GameState::handleGhostSolidification()
         bool telefragged = false;
         const auto &segments = snake.getSegments();
 
+        // Check if any body segment materialized inside a wall/hole
         for (const auto &segment : segments)
         {
             if (std::find(holes.begin(), holes.end(), segment) != holes.end())
@@ -225,21 +227,19 @@ bool GameState::handleGhostSolidification()
             }
         }
 
+        // Check to see if any snake segments overlap with each other
         if (!telefragged)
         {
-            for (size_t i = 0; i < segments.size(); ++i)
-            {
-                for (size_t j = i + 1; j < segments.size(); ++j)
-                {
-                    if (segments[i] == segments[j])
-                    {
-                        telefragged = true;
-                        break;
-                    }
-                }
+            std::unordered_set<uint64_t> seenSegments;
 
-                if (telefragged)
+            for (const auto &segment : segments)
+            {
+                // Pack (x, y) into a 64-bit integer for fast set lookup
+                uint64_t packedPos = (static_cast<uint64_t>(segment.x) << 32) | static_cast<uint32_t>(segment.y);
+
+                if (!seenSegments.insert(packedPos).second)
                 {
+                    telefragged = true;
                     break;
                 }
             }
@@ -251,6 +251,7 @@ bool GameState::handleGhostSolidification()
             return true;
         }
     }
+
     return false;
 }
 
@@ -353,33 +354,13 @@ bool GameState::handleBoundariesAndPortals()
     if (gameData.settingsManager.wrapAroundEnabled)
     {
         sf::Vector2i head = snake.getHeadPosition();
-        bool wrapped = false;
+        sf::Vector2i wrappedHead;
+        wrappedHead.x = (head.x % gridBounds.x + gridBounds.x) % gridBounds.x;
+        wrappedHead.y = (head.y % gridBounds.y + gridBounds.y) % gridBounds.y;
 
-        if (head.x < 0)
+        if (wrappedHead != head)
         {
-            head.x = gridBounds.x - 1;
-            wrapped = true;
-        }
-        else if (head.x >= gridBounds.x)
-        {
-            head.x = 0;
-            wrapped = true;
-        }
-
-        if (head.y < 0)
-        {
-            head.y = gridBounds.y - 1;
-            wrapped = true;
-        }
-        else if (head.y >= gridBounds.y)
-        {
-            head.y = 0;
-            wrapped = true;
-        }
-
-        if (wrapped)
-        {
-            snake.setHeadPosition(head);
+            snake.setHeadPosition(wrappedHead);
         }
     }
     else
