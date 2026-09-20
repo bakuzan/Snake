@@ -49,6 +49,7 @@ GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &wi
         spawnPortals();
     }
 
+    initGrid();
     updateView();
 
     // Start
@@ -490,24 +491,48 @@ void GameState::updateView()
     gameView.setCenter(boardCenter);
 }
 
+void GameState::initGrid()
+{
+    float boardWidth = gridBounds.x * Constants::CELL_SIZE;
+    float boardHeight = gridBounds.y * Constants::CELL_SIZE;
+
+    // Setup the solid background
+    boardBackground.setSize(sf::Vector2f(boardWidth, boardHeight));
+    boardBackground.setFillColor(Constants::cellColour);
+
+    // Setup the grid lines
+    gridLines.setPrimitiveType(sf::Lines);
+    gridLines.resize((gridBounds.x + 1 + gridBounds.y + 1) * 2);
+
+    int vertexIndex = 0;
+
+    // Vertical lines
+    for (int x = 0; x <= gridBounds.x; ++x)
+    {
+        float xPos = x * Constants::CELL_SIZE;
+        gridLines[vertexIndex].position = sf::Vector2f(xPos, 0.f);
+        gridLines[vertexIndex++].color = Constants::cellBorder;
+
+        gridLines[vertexIndex].position = sf::Vector2f(xPos, boardHeight);
+        gridLines[vertexIndex++].color = Constants::cellBorder;
+    }
+
+    // Horizontal lines
+    for (int y = 0; y <= gridBounds.y; ++y)
+    {
+        float yPos = y * Constants::CELL_SIZE;
+        gridLines[vertexIndex].position = sf::Vector2f(0.f, yPos);
+        gridLines[vertexIndex++].color = Constants::cellBorder;
+
+        gridLines[vertexIndex].position = sf::Vector2f(boardWidth, yPos);
+        gridLines[vertexIndex++].color = Constants::cellBorder;
+    }
+}
+
 void GameState::renderGrid()
 {
-    sf::RectangleShape cell(sf::Vector2f(Constants::CELL_SIZE, Constants::CELL_SIZE));
-    cell.setFillColor(Constants::cellColour);
-
-    cell.setOutlineThickness(-1.f);
-    cell.setOutlineColor(Constants::cellBorder);
-
-    for (int x = 0; x < gridBounds.x; ++x)
-    {
-        for (int y = 0; y < gridBounds.y; ++y)
-        {
-            cell.setPosition(x * Constants::CELL_SIZE,
-                             y * Constants::CELL_SIZE);
-
-            window.draw(cell);
-        }
-    }
+    window.draw(boardBackground);
+    window.draw(gridLines);
 }
 
 void GameState::renderSpecialFruit()

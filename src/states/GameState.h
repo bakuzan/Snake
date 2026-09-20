@@ -31,6 +31,8 @@ private:
     InputManager inputManager;
 
     // Game props
+    sf::RectangleShape boardBackground;
+    sf::VertexArray gridLines;
     sf::Vector2i gridBounds{Constants::GRID_WIDTH, Constants::GRID_WIDTH};
     sf::Time tickRate{sf::seconds(0.12f)};
     sf::Time tickAccumulator{sf::Time::Zero};
@@ -78,6 +80,7 @@ private:
     void handleSystemEvents(const sf::Event &event);
     void handlePlayerEvents(const sf::Event &event);
     void updateView();
+    void initGrid();
     void renderGrid();
     void renderSpecialFruit();
     void renderPortal(const sf::Vector2i &portal, sf::Color portalColour);
