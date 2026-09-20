@@ -149,7 +149,7 @@ void GameState::render()
         holeShape.setOutlineThickness(-1.f);
         holeShape.setOutlineColor(Constants::pitBorder);
 
-        for (const auto &hole : holes)
+        for (auto hole : holes)
         {
             holeShape.setPosition(hole.x * Constants::CELL_SIZE,
                                   hole.y * Constants::CELL_SIZE);
@@ -401,7 +401,7 @@ bool GameState::checkEndTickDeathConditions()
         if (isHolesEnabled())
         {
             sf::Vector2i head = snake.getHeadPosition();
-            for (const auto &hole : holes)
+            for (auto hole : holes)
             {
                 if (head == hole)
                 {
@@ -679,7 +679,7 @@ void GameState::updateSpecialFruitType()
 
 bool GameState::isCellOccupied(sf::Vector2i cell, bool includeSafeZone) const
 {
-    for (const auto &segment : snake.getSegments())
+    for (auto segment : snake.getSegments())
     {
         if (cell == segment)
         {
@@ -687,7 +687,7 @@ bool GameState::isCellOccupied(sf::Vector2i cell, bool includeSafeZone) const
         }
     }
 
-    for (const auto &hole : holes)
+    for (auto hole : holes)
     {
         if (cell == hole)
         {
