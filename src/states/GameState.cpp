@@ -2,6 +2,7 @@
 #include <format>
 #include <iostream>
 #include <unordered_set>
+#include <random>
 
 #include "utils/InputUtils.h"
 #include "core/SettingsManager.h"
@@ -14,6 +15,11 @@
 #include "GameState.h"
 #include "GameMenuState.h"
 #include "GameOverState.h"
+
+namespace
+{
+    std::mt19937 rng(std::random_device{}());
+}
 
 GameState::GameState(GameData &data, StateManager &manager, sf::RenderWindow &win,
                      SaveData saveData)
@@ -557,15 +563,16 @@ void GameState::spawnSingleHole()
     sf::Vector2i newHole;
     bool validPosition = false;
 
+    std::uniform_int_distribution<int> distX(0, gridBounds.x - 1);
+    std::uniform_int_distribution<int> distY(0, gridBounds.y - 1);
+
     while (!validPosition)
     {
-        newHole.x = std::rand() % gridBounds.x;
-        newHole.y = std::rand() % gridBounds.y;
+        newHole.x = distX(rng);
+        newHole.y = distY(rng);
 
-        // Check if the cell is free of the snake, other holes, and the head's safe zone
         if (!isCellOccupied(newHole, true))
         {
-            // Also ensure it doesn't land on any food or portals
             bool onFood = (newHole == food.getPosition());
             bool onSpecial = (isSpecialFoodActive && newHole == specialFood.getPosition());
             bool onPortal = (gameData.settingsManager.portalsEnabled &&
@@ -583,17 +590,19 @@ void GameState::spawnSingleHole()
 
 void GameState::spawnPortals()
 {
-    auto getValidPosition = [this]() -> sf::Vector2i
+    std::uniform_int_distribution<int> distX(0, gridBounds.x - 1);
+    std::uniform_int_distribution<int> distY(0, gridBounds.y - 1);
+
+    auto getValidPosition = [this, &distX, &distY]() -> sf::Vector2i
     {
         sf::Vector2i pos;
         bool valid = false;
 
         while (!valid)
         {
-            pos.x = std::rand() % gridBounds.x;
-            pos.y = std::rand() % gridBounds.y;
+            pos.x = distX(rng);
+            pos.y = distY(rng);
 
-            // Check if cell is free of snake and holes
             if (!isCellOccupied(pos, false))
             {
                 bool onFood = (pos == food.getPosition());
@@ -605,6 +614,7 @@ void GameState::spawnPortals()
                 }
             }
         }
+
         return pos;
     };
 
@@ -616,7 +626,6 @@ void GameState::spawnPortals()
         return std::abs(a.x - b.x) + std::abs(a.y - b.y);
     };
 
-    // Ensure portals aren't spawned right next to each other
     while (getManhattanDistance(portal1, portal2) < Constants::MIN_PORTAL_DISTANCE)
     {
         portal2 = getValidPosition();
@@ -627,6 +636,9 @@ void GameState::generateHoles(int count)
 {
     holes.clear();
 
+    std::uniform_int_distribution<int> distX(0, gridBounds.x - 1);
+    std::uniform_int_distribution<int> distY(0, gridBounds.y - 1);
+
     for (int i = 0; i < count; ++i)
     {
         sf::Vector2i newHole;
@@ -634,8 +646,8 @@ void GameState::generateHoles(int count)
 
         while (!validPosition)
         {
-            newHole.x = std::rand() % gridBounds.x;
-            newHole.y = std::rand() % gridBounds.y;
+            newHole.x = distX(rng);
+            newHole.y = distY(rng);
 
             if (!isCellOccupied(newHole, true))
             {
@@ -648,7 +660,8 @@ void GameState::generateHoles(int count)
 
 void GameState::updateSpecialFruitType()
 {
-    int roll = std::rand() % 100;
+    std::uniform_int_distribution<int> distRoll(0, 99);
+    int roll = distRoll(rng);
 
     if (snake.getSegments().size() > 15 && roll < 15) // 15% chance if long enough
     {
